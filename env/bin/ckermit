@@ -1,0 +1,42 @@
+#!/usr/bin/kermit +
+define usage {
+    echo "Usage: ckermit serial_device(/dev/ttyUSB0) baud_rate(115200)"
+    exit 0
+}
+
+define cport {
+    set line /dev/\fbasename(\%1)
+    echo "connect to \%1"
+}
+
+define defaultspeed {
+    set speed 115200
+    echo "no speed parameter, set speed to default baud rate: 115200"
+}
+
+define cspeed {
+    set speed \%2
+}
+
+if not def \%1 usage
+else cport \%1
+
+if not def \%2 defaultspeed
+else cspeed \%2
+
+set modem type none   ; There is no modem
+set carrier-watch off
+set prefixing all
+set parity none
+set stop-bits 1
+set serial 8n1
+set modem none
+set file type bin
+set file name lit
+set flow-control none
+set prompt "Kermit > "
+set session-log timestamp
+
+log session /home/nocent/work/log/kermit/\v(ndate)_\v(ntime)_\fbasename(\%1).log
+
+connect

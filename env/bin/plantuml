@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -jar /Users/nocent/utilsset/env/tool/jar/jar/plantuml.jar -tpng $@

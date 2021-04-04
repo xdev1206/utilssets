@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+#
+# Summary: Deactivate virtual environment
+#
+# Usage: pyenv deactivate
+#
+# Deactivate a Python virtual environment.
+
+set -e
+[ -n "$PYENV_DEBUG" ] && set -x
+
+if [ -z "${PYENV_ROOT}" ]; then
+  PYENV_ROOT="$(pyenv-root)"
+fi
+
+unset FORCE
+unset QUIET
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  "-f" | "--force" )
+    FORCE=1
+    ;;
+  "-q" | "--quiet")
+    QUIET=1
+    ;;
+  "-v" | "--verbose" )
+    unset QUIET
+    PYENV_VIRTUALENV_VERBOSE_ACTIVATE=1
+    ;;
+  * )
+    break
+    ;;
+  esac
+  shift 1
+done
+
+if [ -z "${VIRTUAL_ENV}" ]; then
+  if [ -z "${FORCE}" ]; then
+    if [ -z "${QUIET}" ]; then
+      echo "pyenv-virtualenv: no virtualenv has been activated." 1>&2
+    fi
+    echo "false"
+    exit 1
+  fi
+fi
+
+shell="$(basename "${PYENV_SHELL:-$SHELL}")"
+prefix="${VIRTUAL_ENV}"
+
+if [[ "${prefix%/*/envs/*}" == "${PYENV_ROOT}/versions" ]]; then
+  venv="${prefix#${PYENV_ROOT}/versions/}"
+else
+  venv="${prefix##*/}"
+fi
+
+if [ -n "$PYENV_VIRTUALENV_VERBOSE_ACTIVATE" ]; then
+  echo "pyenv-virtualenv: deactivate ${venv}" 1>&2
+fi
+
+# conda package anaconda/miniconda scripts (#173)
+if [ -d "${prefix}/conda-meta" ] ||
+     [ -x "${prefix}/bin/conda" ]; then
+  shopt -s nullglob
+  case "${shell}" in
+  fish )
+    : # conda doesn't support fish
+    ;;
+  * )
+    for script in "${prefix}/etc/conda/deactivate.d"/*.sh; do
+      echo ". \"${script}\";"
+    done
+    echo "unset CONDA_PREFIX"
+    ;;
+  esac
+  shopt -u nullglob
+fi
+
+if [ -n "${PYENV_ACTIVATE_SHELL}" ]; then
+  # shell version set in pyenv-sh-activate should be unset
+  # https://github.com/yyuu/pyenv-virtualenv/issues/61
+  case "$shell" in
+  fish )
+    cat <<EOS
+set -e PYENV_VERSION;
+set -e PYENV_ACTIVATE_SHELL;
+EOS
+    ;;
+  * )
+    cat <<EOS
+unset PYENV_VERSION;
+unset PYENV_ACTIVATE_SHELL;
+EOS
+    ;;
+  esac
+fi
+
+# virtualenv/venv
+case "${shell}" in
+fish )
+  cat <<EOS
+set -e PYENV_VIRTUAL_ENV;
+set -e VIRTUAL_ENV;
+EOS
+  ;;
+* )
+  cat <<EOS
+unset PYENV_VIRTUAL_ENV;
+unset VIRTUAL_ENV;
+EOS
+  ;;
+esac
+
+# anaconda/miniconda
+if [ -n "${CONDA_DEFAULT_ENV}" ]; then
+  case "${shell}" in
+  fish )
+    echo "set -e CONDA_DEFAULT_ENV;"
+    ;;
+  * )
+    echo "unset CONDA_DEFAULT_ENV;"
+    ;;
+  esac
+fi
+
+case "${shell}" in
+fish )
+  cat <<EOS
+if [ -n "\$_OLD_VIRTUAL_PATH" ];
+  set -gx PATH "\$_OLD_VIRTUAL_PATH";
+  set -e _OLD_VIRTUAL_PATH;
+end;
+EOS
+  ;;
+* )
+  cat <<EOS
+if [ -n "\${_OLD_VIRTUAL_PATH}" ]; then
+  export PATH="\${_OLD_VIRTUAL_PATH}";
+  unset _OLD_VIRTUAL_PATH;
+fi;
+EOS
+  ;;
+esac
+
+case "${shell}" in
+fish )
+  cat <<EOS
+if [ -n "\$_OLD_VIRTUAL_PYTHONHOME" ];
+  set -gx PYTHONHOME "\$_OLD_VIRTUAL_PYTHONHOME";
+  set -e _OLD_VIRTUAL_PYTHONHOME;
+end;
+EOS
+  ;;
+* )
+  cat <<EOS
+if [ -n "\${_OLD_VIRTUAL_PYTHONHOME}" ]; then
+  export PYTHONHOME="\${_OLD_VIRTUAL_PYTHONHOME}";
+  unset _OLD_VIRTUAL_PYTHONHOME;
+fi;
+EOS
+  ;;
+esac
+
+case "${shell}" in
+fish )
+  :
+  ;;
+* )
+  cat <<EOS
+if [ -n "\${_OLD_VIRTUAL_PS1}" ]; then
+  export PS1="\${_OLD_VIRTUAL_PS1}";
+  unset _OLD_VIRTUAL_PS1;
+fi;
+EOS
+  ;;
+esac
+
+case "${shell}" in
+fish )
+  cat <<EOS
+if functions -q deactivate;
+  functions -e deactivate;
+end;
+EOS
+  ;;
+* )
+  cat <<EOS
+if declare -f deactivate 1>/dev/null 2>&1; then
+  unset -f deactivate;
+fi;
+EOS
+  ;;
+esac

@@ -1,0 +1,160 @@
+% xetex template
+\documentclass[a4paper,11pt,onecolumn]{article}
+
+\usepackage[top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+
+\usepackage{xltxtra,fontspec,xunicode}
+
+\usepackage{slantsc}
+\usepackage[slantfont,boldfont]{xeCJK} % 允许斜体和粗体
+\usepackage{ulem} % 斜线 波浪线 双下划线
+\setCJKmainfont{Noto Sans CJK SC}   % 设置缺省中文字体
+\setCJKmonofont{Noto Sans Mono CJK SC}   % 设置等宽字体
+\setmainfont{Noto Serif}
+\setsansfont{Noto Sans} % 英文无衬线字体
+\setmonofont{Bitstream Vera Sans Mono}   % 英文等宽字体
+
+% paragraph
+\usepackage{indentfirst}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{5pt}  % The space between paragraphs
+
+% line
+\usepackage{setspace}
+\singlespacing
+\frenchspacing % disable the additional space after periods
+
+% for hyphenation if compound words that contain a dash
+% \usepackage{hypenat}
+% \tolerance=10000
+% \hyphenpenalty=10000
+\hbadness=5000
+\emergencystretch=3em %\maxdimen
+
+% for list
+\usepackage[inline]{enumitem}
+\setlist{leftmargin=2em}
+\newcommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\itemindent}{0pt}\setlength{\parskip}{0pt}\setlength{\partopsep}{0pt}\setlength{\topsep}{5pt}}
+% table
+\usepackage{diagbox}
+\usepackage{multirow}
+\usepackage{longtable} % for table
+\usepackage{booktabs} % for table
+\usepackage[table]{xcolor}
+\usepackage{array}
+
+% code block
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinelanguage{bash}{
+  keywords={type, function, return, in, for, while, until, do, done, if, else, elif, fi, then, case, break, continue, test},
+  sensitive=true,
+  comment=[l]{\#},
+  morestring=[b]', % delimiter type: b -- backslash
+  morestring=[b]",
+  morestring=[b]`,
+}
+
+\lstnewenvironment{lstbash}
+  {
+    \lstset{
+      language=bash,
+      tabsize=4,
+      showtabs=false,
+      frame=shadowbox, % 把代码用带有阴影的框圈起来
+      numbers=none,    % 左侧显示行号 往左靠,还可以为right，或none，即不加行号
+      numbersep=0pt,   % 设置行号与代码的距离，默认是5pt
+      numberstyle={\color[RGB]{0,192,192}\tiny}, % 设置行号的大小，大小有tiny,scriptsize,footnotesize,small,normalsize,large等
+      stepnumber=1, % 若设置为2，则显示行号为1,3,5，即stepnumber为公差,默认stepnumber=1
+      showspaces=false,
+      showstringspaces=false, % 不显示代码字符串中间的空格标记
+      flexiblecolumns=true,
+      breaklines=true, % 对过长的代码自动换行
+      breakautoindent=true,
+      breakindent=2em,
+      aboveskip=1em,   % space between code block and other block
+      belowskip=0em,
+      escapeinside={(*@}{@*)},
+      framextopmargin=2pt,framexbottommargin=2pt,
+      abovecaptionskip=0pt,belowcaptionskip=0pt,
+      xleftmargin=1em,xrightmargin=1em, % 设定listing左右的空白
+      texcl=false,  % 设定中文冲突，断行，列模式，数学环境输入，listing数字的样式
+      mathescape=false,
+      extendedchars=false,
+      basicstyle=\ttfamily, % 这句设置代码的大小
+      backgroundcolor=\color[RGB]{245,245,244},   %代码背景色
+      rulesepcolor=\color{red!20!green!20!blue!20},%代码块边框为淡青色
+      keywordstyle=\color{blue!90}\bfseries, %代码关键字的颜色为蓝色，粗体
+      identifierstyle=\color{black},
+      commentstyle=\color{purple}\ttfamily,
+      stringstyle=\color{red}\ttfamily,
+    }
+  }
+{}
+
+\lstset{
+  alsolanguage=C,
+  alsolanguage=C++,
+  tabsize=4,
+  showtabs=false,
+  frame=shadowbox, % 把代码用带有阴影的框圈起来
+  numbers=none,    % 左侧显示行号 往左靠,还可以为right，或none，即不加行号
+  numbersep=0pt,   % 设置行号与代码的距离，默认是5pt
+  numberstyle={\color[RGB]{0,192,192}\tiny}, % 设置行号的大小，大小有tiny,scriptsize,footnotesize,small,normalsize,large等
+  stepnumber=1, % 若设置为2，则显示行号为1,3,5，即stepnumber为公差,默认stepnumber=1
+  showspaces=false,
+  showstringspaces=false, % 不显示代码字符串中间的空格标记
+  stringstyle=\ttfamily,  % 代码字符串的特殊格式
+  flexiblecolumns=true,
+  breaklines=true, % 对过长的代码自动换行
+  breakautoindent=true,
+  breakindent=2em,
+  aboveskip=1em,   % space between code block and other block
+  belowskip=0em,
+  escapeinside={(*@}{@*)},
+  framextopmargin=2pt,framexbottommargin=2pt,
+  abovecaptionskip=0pt,belowcaptionskip=0pt,
+  xleftmargin=1em,xrightmargin=1em, % 设定listing左右的空白
+  texcl=false,  % 设定中文冲突，断行，列模式，数学环境输入，listing数字的样式
+  mathescape=false,
+  extendedchars=false,
+  basicstyle=\ttfamily, % 这句设置代码的大小
+  backgroundcolor=\color[RGB]{245,245,244},   %代码背景色
+  rulesepcolor=\color{red!20!green!20!blue!20},%代码块边框为淡青色
+  keywordstyle=\color{blue!90}\bfseries, %代码关键字的颜色为蓝色，粗体
+  identifierstyle=\color{black},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  captionpos=b,
+}
+
+% Causes clash if hyperref parameters loaded before bookmark,
+% because bookmark loads hyperref without any parameters
+\usepackage[anchorcolor=blue,citecolor=green]{hyperref}
+\usepackage{bookmark}
+\usepackage{graphicx} % also for scalebox
+\usepackage{caption}
+\usepackage{subcaption} % subfigure
+\usepackage{float}
+\captionsetup{
+  justification=centering,
+  singlelinecheck = false
+}
+
+\hypersetup{colorlinks=true,linkcolor=red,hypertexnames}
+
+\begin{document}
+
+\title{$title$}
+\author{$author$}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+$body$
+
+\end{document}

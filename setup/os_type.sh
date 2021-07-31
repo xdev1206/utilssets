@@ -12,10 +12,8 @@ os_variable()
   OS_TYPE=$(uname -s)
   if [ "x${OS_TYEP}" == "xLinux" ]; then
     BASH_RC="$HOME/.bashrc"
-    INSTALL_CMD='brew install'
   elif [ "x${OS_TYPE}" == "xDarwin" ]; then
     BASH_RC="$HOME/.bash_profile"
-    INSTALL_CMD='apt install -y'
   fi
 
   if [ -f '/etc/centos-release' ]; then

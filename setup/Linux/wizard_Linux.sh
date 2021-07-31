@@ -92,7 +92,7 @@ ubuntu_sources()
   $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
 
   if [ "x$OS_VERSION" == "x18.04" ]; then
-    #ubuntu 18.04
+    # ubuntu 18.04
     echo "deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
@@ -103,7 +103,21 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted univer
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse" | $SUDO tee /etc/apt/sources.list
+  elif [ "x$OS_VERSION" == "x20.04" ]; then
+    # ubuntu 20.04
+    echo "deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse" | $SUDO tee /etc/apt/sources.list
   fi
+
+  $SUDO apt update
 
   #pip source
   $SUDO mv /etc/pip.conf /etc/pip.conf.bk
@@ -122,8 +136,8 @@ linux_sources()
   fi
 }
 
+linux_sources
 func_install_package
 func_bash_env
 func_sudo_env
 func_android_env
-linux_sources

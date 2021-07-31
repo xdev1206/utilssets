@@ -8,19 +8,24 @@ PYENV_PATH=$ENV_ROOT/tool/pyenv
 PYENV_PATH_VIRENV=$PYENV_PATH/plugins/pyenv-virtualenv
 PYENV_CONF=$ENV_ROOT/config/pyenv.conf
 
+remove_tmp()
+{
+  find $PYENV_PATH -iname ".git*" -exec rm -rf {} \;
+  find $PYENV_PATH -iname "*.md" -exec rm -rf {} \;
+  find $PYENV_PATH -iname "LICENSE*" -exec rm -rf {} \;
+  find $PYENV_PATH -iname "*.png" -exec rm -rf {} \;
+}
+
 download_pyenv()
 {
   if [ -d $PYENV_PATH ]; then
     echo "delete $PYENV_PATH"
-    rm -rf $PYENV_PATH
+    rm -rf $PYENV_CONF > /dev/null 2>&1
+    rm -rf $PYENV_PATH > /dev/null 2>&1
   fi
 
-  git clone https://github.com/pyenv/pyenv.git $PYENV_PATH
-  git clone https://github.com/pyenv/pyenv-virtualenv.git $PYENV_PATH_VIRENV
-
-  find $PYENV_PATH -iname ".git*" -exec rm -rf {} \;
-  find $PYENV_PATH -iname "*.md" -exec rm -rf {} \;
-  find $PYENV_PATH -iname "LICENSE*" -exec rm -rf {} \;
+  git clone --depth 1 https://github.com/pyenv/pyenv.git $PYENV_PATH
+  git clone --depth 1 https://github.com/pyenv/pyenv-virtualenv.git $PYENV_PATH_VIRENV
 
   # remove system default virtualenv package
   rm -rf $HOME/.local/lib/python2.7/site-packages/virtualenv* 2>&1
@@ -54,6 +59,7 @@ python_env()
   fi
 
   download_pyenv && pyenv_to_conf
+  remove_tmp > /dev/null 2>&1
 
   OS_TYPE=$(uname -s)
   source $SCRIPT_PATH/$OS_TYPE/pyenv_$OS_TYPE.sh

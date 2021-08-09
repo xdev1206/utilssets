@@ -1,3 +1,8 @@
+/*
+ * compilation:
+ * g++ -o timeExe time_util.c -std=c++11
+ */
+
 /*#include <time.h>
 
 struct timespec
@@ -6,9 +11,14 @@ struct timespec
     long tv_nsec;  [>nanosecond<]
 }*/
 
+#include <iostream>
+#include <unistd.h> // usleep function
+
 #include <time.h>
 #include <memory.h>
 #include <stdio.h>
+#include <chrono> // C++
+#include <sys/time.h> // gettimeofday
 
 int main()
 {
@@ -31,13 +41,27 @@ int main()
 
     printf("second: %ld, nanosecond: %ld\n", wall_time.tv_sec, wall_time.tv_nsec);
 
-    long int timer;
     struct timeval time_start;
     struct timeval time_end;
 
     gettimeofday(&time_start, NULL);  // wall time
     gettimeofday(&time_end, NULL);
 
-    timer = 1000000 * (time_end.tv_sec - time_start.tv_sec) + (time_end.tv_usec - time_start.tv_usec);
+    long int timer = 1000000 * (time_end.tv_sec - time_start.tv_sec) + (time_end.tv_usec - time_start.tv_usec);
+    printf("gettimeofday: %ld\n", timer);
+
+    /*
+     * C++ print timestamp and date
+     */
+    auto start = std::chrono::system_clock::now();
+    // Some computation here
+    usleep(100000); // sleep 100ms
+    auto end = std::chrono::system_clock::now();
+
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+    std::chrono::duration<double> elapsed_seconds = end - start;
+
+    std::cout << "date: " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s\n";
     return 0;
 }

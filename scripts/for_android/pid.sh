@@ -33,11 +33,16 @@ if [ ! -d "${pid_dir}" ]; then
     mkdir -p ${pid_dir}/top
 fi
 
-for i in `seq 1 1000`
+for i in `seq 1 10000`
 do
+    if [ ! -d /proc/${pid} ]; then
+        echo "no ${pid_name} process, exit loop!"
+        exit 1
+    fi
+
     echo "${i}th memory info:"
-    #echo "cat /proc/${pid}/maps > ${pid_dir}/maps_${pid}_$i"
-    #cat /proc/${pid}/maps > ${pid_dir}/maps_${pid}_$i
+    cat /proc/${pid}/maps > ${pid_dir}/maps_${pid}_$i
+    cat /proc/${pid}/smaps > ${pid_dir}/smaps_${pid}_$i
 
     ${TOP_PID_CMD} ${pid} >> ${pid_dir}/top/top_${pid}_$i
 
@@ -46,6 +51,7 @@ do
     vmStk=`cat /proc/${pid}/status | grep -i VmStk | sed 's/[ ]\{1,10\}/ /g' | cut -d' ' -f 2`
     vmExe=`cat /proc/${pid}/status | grep -i VmExe | sed 's/[ ]\{1,10\}/ /g' | cut -d' ' -f 2`
 
+    date
     echo "rss:${vmRSS}, data:${vmData}, stack:${vmStk}, vmExe:${vmExe} KB"
     sleep 1;
 done

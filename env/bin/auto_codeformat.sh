@@ -1,43 +1,41 @@
 #!/bin/bash
 
-# $1 filename
-# $2 version
-function check_java_copyright() {
-  file=$1
-  version=$2
-  filename=`basename $file`
+function formatting()
+{
+  source_file=$1
 
-  copyright="/\*\n \* Copyright (C), 2018, xxx Corp., Ltd\n \* All rights reserved.\n \* File: $filename\n \* Description:\n \*\n \* Date: `date +'%F'`\n */\n"
-
-  echo "$file, add copyright information..."
-  sed '1i\'"$copyright" -i $file
+  echo "auto formatting: ${source_file}"
+   # change permission to 644
+  chmod 644 ${source_file}
+  # to unix file format
+  #dos2unix ${source_file}
+  # remove trailing spaces at the end of lines
+  sed -i 's/[ ]\+$//' ${source_file}
+  # replace tab to 4 whitespace
+  sed -i 's/\t/    /g' ${source_file}
+  # merge multi-blank lines to one blank line
+  sed -i '/^$/{N;/^\n*$/D}' ${source_file}
+  # add \n if there is no \n at the last line of file
+  sed -i '$a\' ${source_file}
 }
 
-# file extension suffix list
-suffix_list="py java xml c cc cpp h hpp"
+astyle_common_options="-v -n -r"
 
-for suffix in $suffix_list
-do
-  file_list=`find . -type f -name "*.$suffix"`
+java_style='--style=java'
+c_style='--style=kr'
 
-  for file in $file_list
-  do
-    # if [ "$suffix" = "java" ]; then
-    #   check_java_copyright $file 1.0
-    # fi
+tab_style='--attach-namespaces --attach-extern-c --attach-closing-while --indent=spaces=4'
 
-    echo "auto formatting: $file"
-     # change permission to 644
-    chmod 644 $file
-    # to unix file format
-    dos2unix $file
-    # remove trailing spaces at the end of lines
-    sed -i 's/[ ]\+$//' $file
-    # replace tab to 4 whitespace
-    sed -i 's/\t/    /g' $file
-    # merge multi-blank lines to one blank line
-    sed -i '/^$/{N;/^\n*$/D}' $file
-    # add \n if there is no \n at the last line of file
-    sed -i '$a\' $file
-  done
-done
+indentation_style='--indent-preproc-define --indent-col1-comments --min-conditional-indent=0 --max-continuation-indent=120'
+
+padding_style='--pad-oper --pad-comma --pad-header --align-pointer=type --align-reference=type'
+
+formatting_config='--break-closing-braces --attach-return-type --attach-return-type-decl --keep-one-line-blocks --keep-one-line-statements --convert-tabs --max-code-length=200 --mode=c'
+
+other_config='--lineend=linux'
+
+java_wildcard='*.java'
+c_wildcard='*.cpp,*.cc,*.c,*.h'
+
+astyle ${java_style} ${tab_style} ${indentation_style} ${padding_style} ${formatting_config} ${other_config} ${astyle_common_options} "${java_wildcard}"
+astyle ${c_style} ${tab_style} ${indentation_style} ${padding_style} ${formatting_config} ${other_config} ${astyle_common_options} "${c_wildcard}"

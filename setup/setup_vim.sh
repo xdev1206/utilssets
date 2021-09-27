@@ -2,6 +2,9 @@
 
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
 
+if [ "x$OS_NAME" == "x" ]; then
+    source ${SCRIPT_PATH}/os_type.sh
+fi
 source $SCRIPT_PATH/path.sh
 
 VIM_PATH=$ENV_ROOT/vim

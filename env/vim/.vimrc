@@ -93,7 +93,7 @@ filetype plugin indent on
 " :set expandtab
 " :retab     ** command mode
 autocmd FileType h,c,cpp,cxx,cc,java setlocal expandtab
-autocmd BufNewFile,BufRead *.sh set expandtab tabstop=4 softtabstop=2 shiftwidth=2
+autocmd BufNewFile,BufRead *.sh set expandtab tabstop=8 softtabstop=4 shiftwidth=4
 autocmd BufNewFile,BufRead *.py let g:indentLine_enabled=1 " for indentLine
 
 " filetype plugin on, then turns on omni completion

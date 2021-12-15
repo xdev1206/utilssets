@@ -1,7 +1,7 @@
 # write vim env config to config.env
 vim_env_to_config()
 {
-  local shell_rc="$HOME/.bash_profile"
+  local shell_rc="${BASH_RC}"
 
   sed -i "" '/^export.*VIM_PATH.*/d' $ENV_CONF
   echo "export VIM_PATH=$VIM_PATH" >> $ENV_CONF
@@ -15,7 +15,6 @@ vim_env_to_config()
 
 vim_dependency()
 {
-  brew install tree
   brew install --HEAD universal-ctags/universal-ctags/universal-ctags
 }
 

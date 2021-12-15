@@ -46,8 +46,7 @@ vim_env() {
 
   #vim -c "set runtimepath^=$VIM_PATH" -c 'PlugInstall' -c 'qall'
 
-  OS_TYPE=$(uname -s) # get operating system name
-  source $SCRIPT_PATH/$OS_TYPE/vim_$OS_TYPE.sh
+  source $SCRIPT_PATH/$OS_TYPE/vim_${OS_TYPE}.sh
 
   remove_tmp > /dev/null 2>&1
 }

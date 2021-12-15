@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# make sure current process is bash, or exit and show usage
+# make sure current process doesn't run in dash, or exit and show usage
 count=`ps aux | grep -i $$ | grep -ciE "(/| |da)sh[ ]+$0"`
 if [ $count -gt 0 ]; then
   echo "usage:"

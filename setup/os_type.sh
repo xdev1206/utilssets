@@ -12,29 +12,33 @@ os_variable()
     OS_TYPE=$(uname -s)
     if [ "x${OS_TYEP}" == "xLinux" ]; then
         BASH_RC="$HOME/.bashrc"
-    elif [ "x${OS_TYPE}" == "xDarwin" ]; then
-        BASH_RC="$HOME/.bash_profile"
-    fi
 
-    if [ -f '/etc/centos-release' ]; then
-        OS_NAME='centos'
-        OS_VERSION=`cat /etc/centos-release | grep -oE "[0-9]+.[0-9]+.[0-9]+"`
-        INSTALL_CMD='yum install -y'
-    elif [ -f '/etc/redhat-release' ]; then
-        OS_NAME='redhat'
-        INSTALL_CMD='yum install -y'
-    elif [ -f '/etc/oracle-release' ]; then
-        OS_NAME='oracle'
-    elif [ -f '/etc/lsb-release' ]; then
-        OS_NAME='ubuntu'
-        OS_VERSION=`cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d'=' -f 2`
-        INSTALL_CMD='apt install -y'
-    elif [ -f '/etc/debian_version' ]; then
-        OS_NAME='debian'
-        INSTALL_CMD='apt install -y'
-    else
-        OS_NAME="unknown"
-        OS_VERSION="unknown"
+        if [ -f '/etc/centos-release' ]; then
+            OS_NAME='centos'
+            OS_VERSION=`cat /etc/centos-release | grep -oE "[0-9]+.[0-9]+.[0-9]+"`
+            INSTALL_CMD='yum install -y'
+        elif [ -f '/etc/redhat-release' ]; then
+            OS_NAME='redhat'
+            INSTALL_CMD='yum install -y'
+        elif [ -f '/etc/oracle-release' ]; then
+            OS_NAME='oracle'
+        elif [ -f '/etc/lsb-release' ]; then
+            OS_NAME='ubuntu'
+            OS_VERSION=`cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d'=' -f 2`
+            INSTALL_CMD='apt install -y'
+        elif [ -f '/etc/debian_version' ]; then
+            OS_NAME='debian'
+            INSTALL_CMD='apt install -y'
+        else
+            OS_NAME="unknown"
+            OS_VERSION="unknown"
+        fi
+    elif [ "x${OS_TYPE}" == "xDarwin" ]; then
+        BASH_RC="$HOME/.zprofile"
+
+        OS_NAME=`sw_vers -productName`
+        OS_VERSION=`sw_vers -productVersion`
+        INSTALL_CMD='brew install'
     fi
 
     echo "Current os type: $OS_TYPE, os name: $OS_NAME, os version: $OS_VERSION"

@@ -23,6 +23,18 @@ func_bash_env()
   # alias
   echo -e "\nalias ll='ls -l --color=auto'" >> $BASH_RC
   echo -e "alias la='ls -la --color=auto'" >> $BASH_RC
+
+  ps1_found=$(cat ${BASH_RC} | grep -c "PS1")
+  if [ ${ps1_found} -eq 0 ]; then
+    export PS1="\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h:\w\$\[\e[0m\] "
+    echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h:\w\$\[\e[0m\] "' >> ${BASH_RC}
+  fi
+
+  env_path_found=$(echo ${PATH} | grep -c "${ENV_PATH}")
+  if [ ${env_path_found} -eq 0 ]; then
+    export PATH=$ENV_PATH/bin:$PATH
+    echo 'export PATH=$ENV_PATH/bin:$PATH' >> ${BASH_RC}
+  fi
 }
 
 func_sudo_env()

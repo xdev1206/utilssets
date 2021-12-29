@@ -10,7 +10,7 @@ os_variable()
 {
     BASH_RC="$HOME/.bashrc"
     OS_TYPE=$(uname -s)
-    if [ "x${OS_TYEP}" == "xLinux" ]; then
+    if [ "x${OS_TYPE}" == "xLinux" ]; then
         BASH_RC="$HOME/.bashrc"
 
         if [ -f '/etc/centos-release' ]; then

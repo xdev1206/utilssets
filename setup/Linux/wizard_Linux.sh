@@ -4,30 +4,27 @@ func_install_package()
 {
   # necessary package
   # fonts-arphic-gkai00mp:文鼎PL简中楷（GB 码）
-  $SUDO ${INSTALL_CMD} make cscope vim curl bash-completion pkg-config \
+  $SUDO ${INSTALL_CMD} make cmake cscope vim curl bash-completion pkg-config \
       openssh-server cifs-utils tree fonts-freefont-ttf texinfo flex bison \
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
       libclang-7-dev libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \
       automake python3-docutils git libbz2-dev liblzma-dev astyle zlib1g-dev \
-      libffi-dev
+      libffi-dev inetutils-ping net-tools libtool
 }
 
 func_bash_env()
 {
-  bash_config=`cat $BASH_RC | grep -c "alias ll="`
-  if [ $bash_config -gt 0 ]; then
-    echo "ignore bash env setup..."
-    return
+  alias_found=`cat $BASH_RC | grep -c "alias ll="`
+  if [ $alias_found -eq 0 ]; then
+    # alias
+    echo -e "\nalias ll='ls -l --color=auto'" >> $BASH_RC
+    echo -e "alias la='ls -la --color=auto'" >> $BASH_RC
   fi
-
-  # alias
-  echo -e "\nalias ll='ls -l --color=auto'" >> $BASH_RC
-  echo -e "alias la='ls -la --color=auto'" >> $BASH_RC
 
   ps1_found=$(cat ${BASH_RC} | grep -c "PS1")
   if [ ${ps1_found} -eq 0 ]; then
     export PS1="\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h:\w\$\[\e[0m\] "
-    echo 'export PS1="\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h:\w\$\[\e[0m\] "' >> ${BASH_RC}
+    echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ${BASH_RC}
   fi
 
   env_path_found=$(echo ${PATH} | grep -c "${ENV_PATH}")
@@ -145,7 +142,7 @@ linux_sources()
   if [ "x$OS_NAME" == "xubuntu" ]; then
     ubuntu_sources
   else
-    echo "os type: $OS_TYPE, ignore."
+    echo "os type: $OS_TYPE, os name: $OS_NAME, skip changing package sources."
   fi
 }
 

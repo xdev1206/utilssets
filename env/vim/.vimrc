@@ -52,7 +52,7 @@ set autoindent
 set smartindent
 set cindent                      " c 语言语法缩进，good
 " C/C++ indent options, help cinoptions-values
-set cinoptions=(0,u0,U0,:0,g0,l1,t0
+set cinoptions=(0,W8,U0,:0,g0,l1,t0,N-4,E-4
 
 if v:version > 704
   set listchars=trail:¶  " [ 二合字母：crtl+k  PI ]  显示行尾的空格，:help dig

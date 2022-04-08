@@ -13,3 +13,7 @@ fi
 ENV_ROOT=$(cd `dirname $BASH_SOURCE`/../env && /bin/pwd)
 ENV_BIN=${ENV_ROOT}/bin
 ENV_CONF=$ENV_ROOT/config.env
+
+echo "ENV_ROOT: ${ENV_ROOT}"
+echo "ENV_BIN: ${ENV_BIN}"
+echo "ENV_CONF: ${ENV_CONF}"

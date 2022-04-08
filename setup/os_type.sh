@@ -41,7 +41,10 @@ os_variable()
         INSTALL_CMD='brew install'
     fi
 
-    echo "Current os type: $OS_TYPE, os name: $OS_NAME, os version: $OS_VERSION"
+    echo "BASH_RC: ${BASH_RC}"
+    echo "OS_TYPE: $OS_TYPE"
+    echo "OS_NAME: $OS_NAME"
+    echo "OS_VERSION: $OS_VERSION"
 }
 
 os_variable

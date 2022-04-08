@@ -15,14 +15,20 @@ vim_env_to_config()
 
 vim_dependency()
 {
-    if [ "x$OS_NAME" == "xdebian" -o "x$OS_NAME" == "xubuntu" ]; then
-        ${SUDO} ${INSTALL_CMD} libxml2 libjansson-dev libyaml-dev
+    # need network
+    if [ "x${reach_network}" == "x1" ]; then
+        if [ "x$OS_NAME" == "xdebian" -o "x$OS_NAME" == "xubuntu" ]; then
+            ${SUDO} ${INSTALL_CMD} universal-ctags libxml2 libjansson-dev libyaml-dev
+        fi
+    else
+	echo "can't connect to network, ignore this action."
     fi
 }
 
 vim_os_specific()
 {
     vim_env_to_config
+    vim_dependency
 }
 
 echo "do vim os specific setting up"

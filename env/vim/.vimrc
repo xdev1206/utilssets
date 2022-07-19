@@ -176,4 +176,5 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'will133/vim-dirdiff'
 Plug 'xavierd/clang_complete'
+Plug 'udalov/kotlin-vim'
 call plug#end()

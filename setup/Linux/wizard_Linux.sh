@@ -4,7 +4,7 @@ func_install_package()
 {
   # necessary package
   # fonts-arphic-gkai00mp:文鼎PL简中楷（GB 码）
-  $SUDO ${INSTALL_CMD} make cmake cscope vim curl bash-completion pkg-config \
+  $SUDO ${INSTALL_CMD} make cmake cscope vim-youcompleteme clang curl bash-completion pkg-config \
       openssh-server cifs-utils tree fonts-freefont-ttf texinfo flex bison \
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
       libclang-7-dev libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \

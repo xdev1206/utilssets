@@ -15,7 +15,8 @@ vim_dependency()
     # need network
     if [ "x${reach_network}" == "x1" ]; then
         if [ "x$OS_NAME" == "xdebian" -o "x$OS_NAME" == "xubuntu" ]; then
-            ${SUDO} ${INSTALL_CMD} universal-ctags libxml2 libjansson-dev libyaml-dev
+            # install universal-ctags manuually
+            ${SUDO} ${INSTALL_CMD} exuberant-ctags libxml2 libjansson-dev libyaml-dev
         fi
     else
 	echo "can't connect to network, ignore this action."

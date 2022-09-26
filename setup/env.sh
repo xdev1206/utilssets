@@ -25,7 +25,21 @@ fi
 
 check_env()
 {
-    local found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")
+    local found=0
+    found=$(cat "$ENV_CONF" | grep -c "PATH=")
+
+    if [ $found -eq 0 ]; then
+        cat <<EOF >> $ENV_CONF
+found=\$(echo "\$PATH" | grep -c "\$ENV_PATH")
+if [ \$found -eq 0 ]; then
+    export PATH=\${ENV_PATH}/bin:\${PATH}
+fi
+EOF
+    else
+        sed 's/^export.*PATH=.*/export PATH=${ENV_PATH}\/bin:${PATH}/' -i $ENV_CONF
+    fi
+
+    found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")
     if [ $found -eq 0 ]; then
         echo "export ENV_PATH=$ENV_ROOT" >> $BASH_RC
     fi

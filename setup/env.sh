@@ -30,7 +30,7 @@ check_env()
         echo "export ENV_PATH=$ENV_ROOT" >> $BASH_RC
     fi
 
-    found=$(cat "$BASH_RC" | grep -c "$ENV_PATH/config.env")
+    found=$(cat "$BASH_RC" | grep -c "ENV_PATH/config.env")
     if [ $found -eq 0 ]; then
         echo 'source $ENV_PATH/config.env' >> $BASH_RC
     fi

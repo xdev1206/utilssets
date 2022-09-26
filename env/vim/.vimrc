@@ -3,7 +3,6 @@ scriptencoding utf-8
 set encoding=utf-8                       " 编码设置
 set nocompatible                         " 去除vi一致性
 set runtimepath^=$VIM_PATH
-set runtimepath+=/usr/share/vim-youcompleteme/
 set modelines=0                          " 禁用模式行（安全措施）
 colorscheme peachpuffx
 
@@ -163,11 +162,42 @@ let g:ycm_collect_identifiers_from_tags_files=1
 let g:ycm_min_num_of_chars_for_completion=3
 let g:ycm_seed_identifiers_with_syntax=1
 
+" set netrw maxium number of modified directories to 0
+let g:netrw_dirhistmax = 0
+" set current history count of modified directories to 0
+let g:netrw_dirhist_cnt = 0
 " tagbar
 let g:tagbar_left = 1
 let g:tagbar_foldlevel = 1
 let g:tagbar_sort = 0
 let g:tagbar_width = 30
+
+if has("cscope")
+    set csprg=/usr/bin/cscope
+    set csto=1
+    set cst
+    " set csverb  " output verbose message and wait enter key
+    set cspc=10
+    set nocscopeverbose
+    if filereadable("cscope.out")    "add any database in current dir
+        cs add cscope.out . -C
+    else    "else search cscope.out elsewhere
+        let cscope_file=findfile("cscope.out", ".;")
+        let cscope_pre=matchstr(cscope_file, ".*/")
+        if !empty(cscope_file) && filereadable(cscope_file)        "echo cscope_file
+            exe "cs add" cscope_file cscope_pre "-C"
+        endif
+    endif
+endif
+
+if filereadable("tags") "add any database in current dir
+    set tags=tags
+else "else search tags elsewhere
+    let tags_file=findfile("tags", ".;")
+    if !empty(tags_file) && filereadable(tags_file)
+        exe "set tags=" . tags_file
+    endif
+endif
 
 " YouCompleteMe 功能
 " 补全内容不以分割子窗口形式出现，只显示补全列表

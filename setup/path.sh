@@ -12,12 +12,7 @@ fi
 
 ENV_ROOT=$(cd `dirname $BASH_SOURCE`/../env && /bin/pwd)
 ENV_BIN=${ENV_ROOT}/bin
-ENV_CONF=$ENV_ROOT/config.env
-
-found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")
-if [ $found -eq 0 ]; then
-    echo "export ENV_PATH=$ENV_ROOT" >> $BASH_RC
-fi
+ENV_CONF=$ENV_ROOT/config/env.conf
 
 echo "ENV_ROOT: ${ENV_ROOT}"
 echo "ENV_BIN: ${ENV_BIN}"

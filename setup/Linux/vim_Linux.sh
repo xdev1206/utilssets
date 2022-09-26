@@ -3,11 +3,6 @@ vim_env_to_config()
 {
     sed '/^export.*VIM_PATH.*/d' -i $ENV_CONF
     echo "export VIM_PATH=$VIM_PATH" >> $ENV_CONF
-
-    found=$(cat "$BASH_RC" | grep -c "$ENV_CONF")
-    if [ $found -eq 0 ]; then
-        echo 'source $ENV_PATH/config.env' >> $BASH_RC
-    fi
 }
 
 vim_dependency()

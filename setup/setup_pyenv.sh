@@ -37,11 +37,9 @@ download_pyenv()
 pyenv_to_conf()
 {
     echo "export PYENV_PATH=$PYENV_PATH" > $PYENV_CONF
-    echo -e 'export PATH="$PYENV_PATH/bin:$PATH"\n' >> $PYENV_CONF
-    echo -e 'if command -v pyenv 1> /dev/null 2>&1; then' >> $PYENV_CONF
-    echo '    eval "$(pyenv init -)"' >> $PYENV_CONF
-    echo '    eval "$(pyenv virtualenv-init -)"' >> $PYENV_CONF
-    echo 'fi' >> $PYENV_CONF
+    echo -e 'export PATH="$PYENV_PATH/bin:$PATH"\n\n' >> $PYENV_CONF
+
+    $PYENV_PATH/bin/pyenv init - >> $PYENV_CONF
 
     cp $PYENV_CONF $HOME/
 

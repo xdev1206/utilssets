@@ -9,7 +9,7 @@ func_install_package()
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
       libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \
       automake python3-docutils git libbz2-dev liblzma-dev astyle zlib1g-dev \
-      libffi-dev inetutils-ping net-tools libtool gcc
+      libffi-dev inetutils-ping net-tools libtool gcc libncurses-dev
 }
 
 func_bash_env()

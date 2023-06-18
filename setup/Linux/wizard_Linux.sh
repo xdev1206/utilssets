@@ -27,11 +27,8 @@ func_bash_env()
     echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ${BASH_RC}
   fi
 
-  env_path_found=$(echo ${PATH} | grep -c "${ENV_PATH}")
-  if [ ${env_path_found} -eq 0 ]; then
-    export PATH=$ENV_PATH/bin:$PATH
-    echo 'export PATH=$ENV_PATH/bin:$PATH' >> ${BASH_RC}
-  fi
+  # force color prompt
+  sed 's/\#force_color_prompt=yes/force_color_prompt=yes/g' -i ${BASH_RC}
 }
 
 func_sudo_env()

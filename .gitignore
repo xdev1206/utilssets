@@ -1,2 +1,4 @@
 env/tool/fzf/bin/fzf
 env/config/env.conf
+env/tool/pyenv
+env/config/pyenv.conf

@@ -34,11 +34,16 @@ os_variable()
             OS_VERSION="unknown"
         fi
     elif [ "x${OS_TYPE}" == "xDarwin" ]; then
-        BASH_RC="$HOME/.zprofile"
-
         OS_NAME=`sw_vers -productName`
         OS_VERSION=`sw_vers -productVersion`
+
+        #Running Homebrew as root is extremely dangerous and no longer supported
+        SUDO=''
         INSTALL_CMD='brew install'
+        if [ "${SHELL}" != "/bin/bash" ]; then
+            echo "Please use bash as default interactive shell on ${OS_NAME}"
+            exit 0
+        fi
     fi
 
     echo "BASH_RC: ${BASH_RC}"

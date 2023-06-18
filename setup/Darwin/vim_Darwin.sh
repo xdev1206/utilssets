@@ -1,7 +1,7 @@
 # write vim env config to config.env
 vim_env_to_config()
 {
-  sed '/^export.*VIM_PATH.*/d' -i $ENV_CONF
+  sed -i '' '/^export.*VIM_PATH.*/d' $ENV_CONF
   echo "export VIM_PATH=$VIM_PATH" >> $ENV_CONF
 }
 

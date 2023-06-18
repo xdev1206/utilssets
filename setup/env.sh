@@ -36,7 +36,11 @@ if [ \$found -eq 0 ]; then
 fi
 EOF
     else
-        sed 's/^export.*PATH=.*/export PATH=${ENV_PATH}\/bin:${PATH}/' -i $ENV_CONF
+        if [ "x${OS_TYPE}" == "xDarwin" ]; then
+            sed -i '' 's/^export.*PATH=.*/export PATH=${ENV_PATH}\/bin:${PATH}/' $ENV_CONF
+        else
+            sed 's/^export.*PATH=.*/export PATH=${ENV_PATH}\/bin:${PATH}/' -i $ENV_CONF
+        fi
     fi
 
     found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")

@@ -14,7 +14,7 @@ vim_dependency()
             ${SUDO} ${INSTALL_CMD} exuberant-ctags libxml2 libjansson-dev libyaml-dev
         fi
     else
-	echo "can't connect to network, ignore this action."
+        echo "can't connect to network, ignore this action."
     fi
 }
 

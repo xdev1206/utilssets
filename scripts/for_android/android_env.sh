@@ -1,5 +1,7 @@
 #!/bin/bash
 
+commandlinetools_mac='https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip'
+
 env_root=$HOME/env/android
 sdk_tools_zip_url='https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip'
 sdk_tools_zip=${sdk_tools_zip_url##*\/}

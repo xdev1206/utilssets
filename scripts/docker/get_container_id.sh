@@ -19,15 +19,22 @@ pid=$1
 
 while :
 do
-    result=`ps -A -o pid,ppid,cmd | grep -i "^$pid" | grep -vE "$script|grep" | sed 's/[ ]\+/ /g'`
+    result=`ps -A -o pid,ppid,cmd | sed 's/[ ]\+/ /g' | grep -iE "^[ ]*$pid " | grep -vE "$script|grep"`
 
     docker_hash=`echo $result | grep -ioE "moby/[a-zA-Z0-9]+"`
     if [ "$docker_hash" != "" ]; then
+        echo "found_container: ${docker_hash}"
         container=`echo "$docker_hash" | cut -d'/' -f2 | head -c 10`
         docker ps -a | grep -i $container
         break
     fi
 
     pid=`echo $result | cut -d' ' -f2`
-    echo "$result"
+    echo -e "reulst:\n${result}"
+    echo "new pid: ${pid}"
+
+    if [ "x${pid}x" == "x0x" ]; then
+        echo "can't find docker container, exit!"
+        exit 0
+    fi
 done

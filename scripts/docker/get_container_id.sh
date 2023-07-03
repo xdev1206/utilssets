@@ -7,6 +7,13 @@ cat << EOF
 EOF
 }
 
+para_num=$#
+if [ ${para_num} -eq 0 ]; then
+    echo "parameter nubmer is zero!"
+    usage
+    exit 1
+fi
+
 script=$0
 pid=$1
 

@@ -155,13 +155,6 @@ let g:netrw_altv = 1           " 水平分割时，文件浏览器始终显示�
 let g:netrw_winsize = 20       " 设置文件浏览器窗口宽度为25%
 let g:netrw_list_hide= '^\..*' " 不显示隐藏文件 用 a 键就可以显示所有文件、 隐藏匹配文件或只显示匹配文件
 
-" youcompleteme
-let g:ycm_semantic_triggers = {}
-let g:ycm_semantic_triggers.c = ['->', '.', '(', '[', '&']
-let g:ycm_collect_identifiers_from_tags_files=1
-let g:ycm_min_num_of_chars_for_completion=3
-let g:ycm_seed_identifiers_with_syntax=1
-
 " set netrw maxium number of modified directories to 0
 let g:netrw_dirhistmax = 0
 " set current history count of modified directories to 0
@@ -199,32 +192,14 @@ else "else search tags elsewhere
     endif
 endif
 
-" YouCompleteMe 功能
-" 补全内容不以分割子窗口形式出现，只显示补全列表
-set completeopt-=preview
-let g:ycm_collect_identifiers_from_tags_files = 1           " 开启 YCM 基于标签引擎
-let g:ycm_collect_identifiers_from_comments_and_strings = 1 " 注释与字符串中的内容也用于补全
-let g:syntastic_ignore_files=[".*\.py$"]
-let g:ycm_seed_identifiers_with_syntax = 1                  " 语法关键字补全
-let g:ycm_confirm_extra_conf = 0 " 允许 vim 加载 .ycm_extra_conf.py 文件，不再提示
-let g:ycm_key_list_select_completion = ['<c-n>', '<Down>']  " 映射按键, 没有这个会拦截掉tab, 导致其他插件的tab不能用.
-let g:ycm_key_list_previous_completion = ['<c-p>', '<Up>']
-let g:ycm_complete_in_comments = 1                          " 在注释输入中也能补全
-let g:ycm_complete_in_strings = 1                           " 在字符串输入中也能补全
-let g:ycm_collect_identifiers_from_comments_and_strings = 1 " 注释和字符串中的文字也会被收入补全
-let g:ycm_show_diagnostics_ui = 0                           " 禁用语法检查
-let g:ycm_min_num_of_chars_for_completion=3                 " 从第3个键入字符就开始罗列匹配项
-let g:ycm_key_invoke_completion = '<M-;>'  " 修改对C函数的补全快捷键，默认是CTRL + space，修改为ALT + ;
-
 autocmd InsertLeave * if pumvisible() == 0|pclose|endif	"离开插入模式后自动关闭预览窗口
 inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"	" 回车即选中当前项
 " 快捷键绑定-------------------------
 let mapleader='\'
 " 设置转到定义处的快捷键
-nnoremap <c-]>  :YcmCompleter GoToDefinitionElseDeclaration <C-R>=expand("<cword>")<CR><CR>
+"nnoremap  <c-]>  g<c-]>      " 键值映射  ctrl+]  映射为  g+ctrl+]
 nnoremap <LEADER>ft :Lexplore<CR>    " 打开或关闭目录树
 nnoremap <F2> :Tagbar<CR><esc><c-w>=  " trigger and make all windows equally high and wide
-nnoremap <F3>  :YcmGenerateConfig<CR>
 nnoremap <F4> :close<CR>     " 多个窗口时，快速关闭当前窗口
 
 " plugins installed by vim-plug
@@ -243,5 +218,4 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'will133/vim-dirdiff'
 Plug 'udalov/kotlin-vim'
-Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
 call plug#end()

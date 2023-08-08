@@ -48,6 +48,7 @@ set tabstop=8            " 设定 tab 长度为 4
 set number               " 显示行号
 set showmatch            " 插入括号时，短暂地跳转到匹配的对应括号
 set matchtime=2          " 短暂跳转到匹配括号的时间
+set matchpairs+=<:>      " Characters that form pairs
 
 set laststatus=2                         " always show statusline
 "set showtabline=2                        " always show tabline

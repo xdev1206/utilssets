@@ -3,13 +3,12 @@
 func_install_package()
 {
   # necessary package
-  # fonts-arphic-gkai00mp:文鼎PL简中楷（GB 码）
-  $SUDO ${INSTALL_CMD} make cmake cscope vim clang curl bash-completion pkg-config \
+  $SUDO ${INSTALL_CMD} build-essential openjdk-17-jdk make automake cmake cscope vim curl bash-completion pkg-config \
       openssh-server cifs-utils tree fonts-freefont-ttf texinfo flex bison \
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
       libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \
-      automake python3-docutils git libbz2-dev liblzma-dev astyle zlib1g-dev \
-      libffi-dev inetutils-ping net-tools libtool gcc libncurses-dev
+      python3-docutils python3-dev git libbz2-dev liblzma-dev astyle zlib1g-dev \
+      libffi-dev inetutils-ping net-tools libtool libncurses-dev
 }
 
 func_bash_env()

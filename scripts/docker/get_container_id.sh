@@ -21,10 +21,12 @@ while :
 do
     result=`ps -A -o pid,ppid,cmd | sed 's/[ ]\+/ /g' | grep -iE "^[ ]*$pid " | grep -vE "$script|grep"`
 
-    docker_hash=`echo $result | grep -ioE "moby/[a-zA-Z0-9]+"`
-    if [ "$docker_hash" != "" ]; then
-        echo "found_container: ${docker_hash}"
-        container=`echo "$docker_hash" | cut -d'/' -f2 | head -c 10`
+    docker_hash=`echo $result | grep -ioE "moby( -id |/)[a-z0-9]+"`
+   if [ "$docker_hash" != "" ]; then
+        echo "found_hash: ${docker_hash}"
+        container=`echo "$docker_hash" | sed -e "s/moby\( -id \|\/\)//g" | head -c 10`
+        echo "found_container: ${container}"
+
         docker ps -a | grep -i $container
         break
     fi

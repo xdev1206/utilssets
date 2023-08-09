@@ -25,9 +25,11 @@ os_variable()
         elif [ -f '/etc/lsb-release' ]; then
             OS_NAME='ubuntu'
             OS_VERSION=`cat /etc/lsb-release | grep DISTRIB_RELEASE | cut -d'=' -f 2`
+            PKG_UPDATE_CMD='apt update'
             INSTALL_CMD='apt install -y'
         elif [ -f '/etc/debian_version' ]; then
             OS_NAME='debian'
+            PKG_UPDATE_CMD='apt update'
             INSTALL_CMD='apt install -y'
         else
             OS_NAME="unknown"

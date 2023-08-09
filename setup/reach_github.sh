@@ -4,6 +4,7 @@ function reach_github()
 {
   local curl_path=$(command -v "curl")
   if [ "x${curl_path}" == "x" ]; then
+    $SUDO ${PKG_UPDATE_CMD}
     $SUDO ${INSTALL_CMD} curl
     echo "$(basename "$0"): install curl"
   fi

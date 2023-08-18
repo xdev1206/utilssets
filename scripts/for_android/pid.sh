@@ -10,14 +10,14 @@ EOF
   exit 1
 fi
 
-PS_PID_CMD="ps -A"
-PS_TID_CMD="ps -AT"
+PS_PID_CMD="ps -o PID,NAME -A"
+PS_TID_CMD="ps -o PID,NAME -AT"
 
 TOP_PID_CMD="top -n 1 -p"
 
 tmp_dir="/data/local/tmp"
 
-pid=`${PS_PID_CMD} | grep -i ${pid_name} | sed -E "s/[ ]+/ /g" | cut -d' ' -f2`
+pid=`${PS_PID_CMD} | grep -iE "${pid_name}$" | sed -E "s/[ ]+/ /g" | cut -d' ' -f1`
 
 if [ "X${pid}" == "X" ]; then
     echo "no ${pid_name} process, exit!"
@@ -40,10 +40,17 @@ do
         exit 1
     fi
 
-    echo "${i}th memory info:"
-    cat /proc/${pid}/maps > ${pid_dir}/maps_${pid}_$i
-    cat /proc/${pid}/smaps > ${pid_dir}/smaps_${pid}_$i
+    echo -e "\n${i}th memory info:\n" >> ${pid_dir}/maps_${pid}_summary
+    cat /proc/${pid}/maps >> ${pid_dir}/maps_${pid}_summary
+    cat /proc/${pid}/maps >> ${pid_dir}/maps_${pid}_$i
 
+    echo -e "\n${i}th memory info:\n" >> ${pid_dir}/smaps_${pid}_summary
+    cat /proc/${pid}/smaps >> ${pid_dir}/smaps_${pid}_summary
+    cat /proc/${pid}/smaps >> ${pid_dir}/smaps_${pid}_$i
+
+    echo -e "\n${i}th top info:\n" >> ${pid_dir}/top/top_${pid}_summary
+    date >> ${pid_dir}/top/top_${pid}_summary
+    ${TOP_PID_CMD} ${pid} | grep -i ${pid} >> ${pid_dir}/top/top_${pid}_summary
     ${TOP_PID_CMD} ${pid} >> ${pid_dir}/top/top_${pid}_$i
 
     vmRSS=`cat /proc/${pid}/status | grep -i VmRSS | sed 's/[ ]\{1,10\}/ /g' | cut -d' ' -f 2`

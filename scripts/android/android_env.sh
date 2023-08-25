@@ -1,6 +1,7 @@
 #!/bin/bash
 
 commandlinetools_mac='https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip'
+commandlinetools_linux='https://dl.google.com/android/repository/platform-tools_r34.0.4-linux.zip'
 
 env_root=$HOME/env/android
 sdk_tools_zip_url='https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip'
@@ -16,6 +17,8 @@ function android_env_dir()
 
 function sdk_setup()
 {
+  
+  sudo apt install openjdk-17-jdk
   wget $sdk_tools_zip_url
   unzip $sdk_tools_zip -d $env_root/$sdk_dir
   rm -rf $sdk_tools_zip
@@ -24,9 +27,9 @@ function sdk_setup()
 
   ./tools/bin/sdkmanager "cmake;3.6.4111459"
   ./tools/bin/sdkmanager "build-tools;27.0.3"
-  ./tools/bin/sdkmanager "platforms;android-25"
   ./tools/bin/sdkmanager "platform-tools"
-  ./tools/bin/sdkmanager "ndk-bundle"
+  #./tools/bin/sdkmanager "platforms;android-25"
+  #./tools/bin/sdkmanager "ndk-bundle"
 
   popd
 

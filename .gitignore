@@ -1,3 +1,4 @@
+env/android/
 env/tool/fzf
 env/config/env.conf
 env/tool/pyenv

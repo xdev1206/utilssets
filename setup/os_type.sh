@@ -31,7 +31,7 @@ os_variable()
             OS_NAME='debian'
             PKG_UPDATE_CMD='apt update'
             INSTALL_CMD='apt install -y'
-	    OS_VERSION=$(cat /etc/debian_version)
+            OS_VERSION=$(cat /etc/debian_version)
         else
             OS_NAME="unknown"
             OS_VERSION="unknown"

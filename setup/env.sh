@@ -26,7 +26,8 @@ fi
 check_env()
 {
     local found=0
-    found=$(cat "$ENV_CONF" | grep -c "PATH=")
+    # avoid add 'export PATH=${ENV_PATH}/bin:${PATH}' into env.conf repeatly
+    found=$(cat "$ENV_CONF" | grep -c "ENV_PATH")
 
     if [ $found -eq 0 ]; then
         cat <<EOF >> $ENV_CONF
@@ -35,12 +36,6 @@ if [ \$found -eq 0 ]; then
     export PATH=\${ENV_PATH}/bin:\${PATH}
 fi
 EOF
-    else
-        if [ "x${OS_TYPE}" == "xDarwin" ]; then
-            sed -i '' 's/^export.*PATH=.*/export PATH=${ENV_PATH}\/bin:${PATH}/' $ENV_CONF
-        else
-            sed 's/^export.*PATH=.*/export PATH=${ENV_PATH}\/bin:${PATH}/' -i $ENV_CONF
-        fi
     fi
 
     found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")
@@ -51,6 +46,27 @@ EOF
     found=$(cat "$BASH_RC" | grep -c "ENV_PATH/config.env")
     if [ $found -eq 0 ]; then
         echo 'source $ENV_PATH/config.env' >> $BASH_RC
+    fi
+}
+
+function complete_env_path()
+{
+    if [ $# -ne 1 ]; then
+        echo "complete_env_path: only support 1 parameter, error!"
+        exit 1
+    fi
+
+    envpath=$1
+    found=$(cat ${ENV_CONF} | grep -c "${envpath}")
+    if [ $found -eq 0 ]; then
+        cat >> ${ENV_CONF} << EOF
+found=\$(echo "\$PATH" | grep -c "${envpath}")
+if [ \$found -eq 0 ]; then
+  export PATH=${envpath}:\${PATH}
+fi
+EOF
+    else
+        echo "env path: ${envpath} already exists in ${ENV_CONF}"
     fi
 }
 

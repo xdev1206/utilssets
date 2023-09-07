@@ -3,7 +3,7 @@
 func_install_package()
 {
   # necessary package
-  $SUDO ${INSTALL_CMD} build-essential openjdk-17-jdk make automake cmake cscope vim curl bash-completion pkg-config \
+  $SUDO ${INSTALL_CMD} lsb-core lsb-release build-essential openjdk-17-jdk make automake cmake cscope vim curl bash-completion pkg-config \
       openssh-server cifs-utils tree fonts-freefont-ttf texinfo flex bison \
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
       libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \
@@ -96,32 +96,20 @@ func_android_env() {
 ubuntu_sources()
 {
   $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
+  codename=$(lsb_release -cs)
 
-  if [ "x$OS_VERSION" == "x18.04" ]; then
-    # ubuntu 18.04
-    echo "deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse" | $SUDO tee /etc/apt/sources.list
-  elif [ "x$OS_VERSION" == "x20.04" ]; then
-    # ubuntu 20.04
-    echo "deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse" | $SUDO tee /etc/apt/sources.list
-  fi
+  $SUDO cat > /etc/apt/sources.list << EOF
+deb http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${codename}-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${codename}-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${codename}-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse
+EOF
 
   $SUDO apt update
 

@@ -23,7 +23,22 @@ if [ "x${reach_network}" == "x" ]; then
   source ${ENV_SCRIPT_DIR}/reach_github.sh
 fi
 
-check_env()
+function setup_bash_env()
+{
+    local found=0
+
+    found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")
+    if [ $found -eq 0 ]; then
+        echo "export ENV_PATH=$ENV_ROOT" >> $BASH_RC
+    fi
+
+    found=$(cat "$BASH_RC" | grep -c "ENV_PATH/config.env")
+    if [ $found -eq 0 ]; then
+        echo 'source $ENV_PATH/config.env' >> $BASH_RC
+    fi
+}
+
+function setup_env_conf()
 {
     local found=0
     # avoid add 'export PATH=${ENV_PATH}/bin:${PATH}' into env.conf repeatly
@@ -36,16 +51,6 @@ if [ \$found -eq 0 ]; then
     export PATH=\${ENV_PATH}/bin:\${PATH}
 fi
 EOF
-    fi
-
-    found=$(cat "$BASH_RC" | grep -c "ENV_PATH=")
-    if [ $found -eq 0 ]; then
-        echo "export ENV_PATH=$ENV_ROOT" >> $BASH_RC
-    fi
-
-    found=$(cat "$BASH_RC" | grep -c "ENV_PATH/config.env")
-    if [ $found -eq 0 ]; then
-        echo 'source $ENV_PATH/config.env' >> $BASH_RC
     fi
 }
 
@@ -70,4 +75,5 @@ EOF
     fi
 }
 
-check_env
+setup_env_conf
+setup_bash_env

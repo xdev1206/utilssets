@@ -3,7 +3,8 @@
 func_install_package()
 {
   # necessary package
-  $SUDO ${INSTALL_CMD} lsb-core lsb-release build-essential openjdk-17-jdk make automake cmake cscope vim curl bash-completion pkg-config \
+  $SUDO ${INSTALL_CMD} lsb-core lsb-release build-essential openjdk-17-jdk \
+      make automake cmake cscope vim curl bash-completion pkg-config \
       openssh-server cifs-utils tree fonts-freefont-ttf texinfo flex bison \
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
       libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \
@@ -121,7 +122,7 @@ extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple
 timeout = 120" | $SUDO tee /etc/pip.conf
 }
 
-linux_sources()
+func_linux_sources()
 {
   if [ "x$OS_NAME" == "xubuntu" ]; then
     ubuntu_sources
@@ -130,7 +131,7 @@ linux_sources()
   fi
 }
 
-linux_sources
+func_linux_sources
 func_install_package
 func_bash_env
 func_sudo_env

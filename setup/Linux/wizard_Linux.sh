@@ -97,7 +97,7 @@ func_android_env() {
 ubuntu_sources()
 {
   $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
-  codename=$(lsb_release -cs)
+  local codename=$(lsb_release -cs)
 
   $SUDO cat > /etc/apt/sources.list << EOF
 deb http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
@@ -113,6 +113,37 @@ deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted 
 EOF
 
   $SUDO apt update
+}
+
+debian_sources()
+{
+  $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
+  local codename=$(lsb_release -cs)
+
+  $SUDO cat > /etc/apt/sources.list << EOF
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-updates main contrib non-free non-free-firmware
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-backports main contrib non-free non-free-firmware
+deb https://mirrors.tuna.tsinghua.edu.cn/debian-security ${codename}-security main contrib non-free non-free-firmware
+
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-updates main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-backports main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security ${codename}-security main contrib non-free non-free-firmware
+EOF
+
+  $SUDO apt update
+}
+
+func_linux_sources()
+{
+  if [ "x$OS_NAME" == "xubuntu" ]; then
+    ubuntu_sources
+  elif [ "x$OS_NAME" == "xdebian" ]; then
+    debian_sources
+  else
+    echo "os type: $OS_TYPE, os name: $OS_NAME, skip changing package sources."
+  fi
 
   #pip source
   $SUDO mv /etc/pip.conf /etc/pip.conf.bk
@@ -120,15 +151,6 @@ EOF
 index-url = https://mirrors.aliyun.com/pypi/simple
 extra-index-url = https://pypi.tuna.tsinghua.edu.cn/simple
 timeout = 120" | $SUDO tee /etc/pip.conf
-}
-
-func_linux_sources()
-{
-  if [ "x$OS_NAME" == "xubuntu" ]; then
-    ubuntu_sources
-  else
-    echo "os type: $OS_TYPE, os name: $OS_NAME, skip changing package sources."
-  fi
 }
 
 func_linux_sources

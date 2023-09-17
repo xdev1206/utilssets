@@ -3,13 +3,14 @@
 func_install_package()
 {
   # necessary package
-  $SUDO ${INSTALL_CMD} lsb-core lsb-release build-essential openjdk-17-jdk \
+  $SUDO ${INSTALL_CMD} lsb-release build-essential openjdk-17-jdk \
       make automake cmake cscope vim curl bash-completion pkg-config \
-      openssh-server cifs-utils tree fonts-freefont-ttf texinfo flex bison \
+      openssh-server cifs-utils tree texinfo flex bison \
       dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
-      libyaml-dev libxml2-dev libseccomp-dev libjansson-dev \
+      libyaml-dev libxml2-dev libseccomp-dev libjansson-dev python3-tk \
       python3-docutils python3-dev git libbz2-dev liblzma-dev astyle zlib1g-dev \
-      libffi-dev inetutils-ping net-tools libtool libncurses-dev
+      libffi-dev inetutils-ping net-tools libtool libncurses-dev libu2f-udev \
+      fonts-liberation fonts-noto-cjk
 }
 
 func_bash_env()
@@ -120,8 +121,7 @@ debian_sources()
   $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
   local codename=$(lsb_release -cs)
 
-  $SUDO cat > /etc/apt/sources.list << EOF
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
+  echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
 deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-updates main contrib non-free non-free-firmware
 deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-backports main contrib non-free non-free-firmware
 deb https://mirrors.tuna.tsinghua.edu.cn/debian-security ${codename}-security main contrib non-free non-free-firmware
@@ -129,8 +129,7 @@ deb https://mirrors.tuna.tsinghua.edu.cn/debian-security ${codename}-security ma
 deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
 deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-updates main contrib non-free non-free-firmware
 deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-backports main contrib non-free non-free-firmware
-deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security ${codename}-security main contrib non-free non-free-firmware
-EOF
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security ${codename}-security main contrib non-free non-free-firmware" | $SUDO tee /etc/apt/sources.list
 
   $SUDO apt update
 }

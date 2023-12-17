@@ -37,6 +37,7 @@ os_variable()
             OS_VERSION="unknown"
         fi
     elif [ "x${OS_TYPE}" == "xDarwin" ]; then
+        BASH_RC="$HOME/.bash_profile"
         OS_NAME=`sw_vers -productName`
         OS_VERSION=`sw_vers -productVersion`
 

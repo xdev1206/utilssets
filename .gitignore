@@ -3,3 +3,7 @@ env/tool/fzf
 env/config/env.conf
 env/tool/pyenv
 env/config/pyenv.conf
+env/share
+env/bin/ctags
+env/bin/optscript
+env/bin/readtags

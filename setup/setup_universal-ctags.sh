@@ -1,13 +1,11 @@
-source env.sh
+#!/bin/bash
 
-if [ "x${reach_network}" == "x1" ]; then
-    git clone https://github.com/universal-ctags/ctags.git
-    cd ctags
-    ./autogen.sh
-    ./configure --prefix=${ENV_ROOT} #default
-    make
-    make install # may require extra privileges depending on where to install
-    cd .. && rm -r ctags
-else
-    echo "${BASH_SOURCE[0]}: can't connect to network, skip this step."
-fi
+SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
+source $SCRIPT_PATH/env.sh
+
+git clone https://github.com/universal-ctags/ctags.git
+cd ctags
+./autogen.sh
+./configure --prefix=${ENV_ROOT}
+make
+make install # may require extra privileges depending on where to install

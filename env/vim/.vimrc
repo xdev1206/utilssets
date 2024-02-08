@@ -37,7 +37,7 @@ set ruler                                " 显示标尺，在右下角显示光�
 set novisualbell                         " 不要闪烁
 set showcmd                              " 显示输入的命令
 
-set fileformat=unix
+set fileformat=unix      " e ++f=unix %
 set fileformats=unix
 set cc=80                " vim7.3默认提供了colorcolumn，即在第80列显示红色宽度线, cuc 表示将当前光标下的列高亮
 set updatetime=1000      " 设定更新.swp 文件时间，milliseconds，此值影响taglist插件更新快慢

@@ -40,21 +40,15 @@ function generate_index
 {
     echo "generate source code index..."
 
-    find ${searchdir[@]} -type f -iname "*.java" -o -iname "*.h" -o -iname "*.h[h|p]" -o -iname "*.c" -o -iname "*.c[x|p]?" > ${file_list}
-    find ${searchdir[@]} -type f -iname "*.h" -o -iname "*.h[h|p]" > ${clang_complete}
-
-    sed -i 's/^/-I"/;s/$/"/' ${clang_complete}
-
+    find ${searchdir[@]} -type f -iname "*.java" -o -iname "*.h*" -o -iname "*.c**" -o -iname "*.kt*" > ${file_list}
     ctags -aR -h ".h.H.hh.hpp.hxx.h++.inc.def" --output-format=e-ctags -L ${file_list} -f tags
+
     # file path starts with double quote(")
     sed -i 's/^/"/;s/$/"/' ${file_list}
     cscope -bkqUv -i ${file_list}
 
     # delete file list
     rm ${file_list}
-
-    # generate .clang_complete file
-    echo "-DDEBUG" >> ${clang_complete}
 }
 
 OPTIND=1

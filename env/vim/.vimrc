@@ -220,3 +220,30 @@ Plug 'junegunn/fzf.vim'
 Plug 'will133/vim-dirdiff'
 Plug 'udalov/kotlin-vim'
 call plug#end()
+
+" for kotlin
+let g:tagbar_type_kotlin = {
+    \ 'ctagstype' : 'kotlin',
+    \ 'ctagsbin' : '$ENV_PATH/bin/ctags',
+    \ 'kinds'     : [
+        \ 'c:classes:0:1',
+        \ 'f:functions',
+        \ 'g:enums',
+        \ 'u:unions',
+        \ 's:structs',
+        \ 'm:members'
+    \ ],
+    \'sro': '.',
+    \ 'kind2scope' : {
+        \ 'c' : 'class',
+        \ 'g' : 'enum',
+        \ 's' : 'struct',
+        \ 'u' : 'union'
+    \},
+    \ 'scope2kind' : {
+        \ 'enum'      : 'g',
+        \ 'class'     : 'c',
+        \ 'struct'    : 's',
+        \ 'union'     : 'u'
+    \ }
+\ }

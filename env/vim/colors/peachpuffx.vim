@@ -32,10 +32,10 @@ endif
 let colors_name = "peachpuffx"
 if has("gui_running") || &t_Co == 256
     " Colors for syntax highlighting
-    hi Comment cterm=NONE ctermfg=DarkGray ctermbg=Black gui=NONE guifg=#585858 guibg=#000000
+    hi Comment cterm=NONE ctermfg=Gray ctermbg=Black gui=NONE guifg=#585858 guibg=#000000
 else
     " Colors for syntax highlighting
-    hi Comment cterm=NONE ctermfg=DarkGray ctermbg=Black
+    hi Comment cterm=NONE ctermfg=Gray ctermbg=Black
 endif
 
 hi Normal guibg=PeachPuff guifg=Black

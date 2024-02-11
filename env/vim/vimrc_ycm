@@ -219,6 +219,7 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'will133/vim-dirdiff'
 Plug 'udalov/kotlin-vim'
+Plug 'ycm-core/YouCompleteMe'
 call plug#end()
 
 " for kotlin

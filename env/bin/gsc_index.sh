@@ -40,7 +40,17 @@ function generate_index
 {
     echo "generate source code index..."
 
-    find ${searchdir[@]} -type f -iname "*.java" -o -iname "*.h*" -o -iname "*.c**" -o -iname "*.kt*" > ${file_list}
+    suffixes="java h hh hpp hxx h++ inc def c cc cpp cxx kt kts"
+    for suffix in ${suffixes}
+    do
+        if [ "zyx${iname_param}" == "zyx" ]; then
+            iname_param="-iname \"*.${suffix}\""
+        else
+            iname_param="${iname_param} -o -iname \"*.${suffix}\""
+        fi
+    done
+
+    eval "find ${searchdir[@]} -type f ${iname_param} > ${file_list}"
     ctags -aR -h ".h.H.hh.hpp.hxx.h++.inc.def" --output-format=e-ctags -L ${file_list} -f tags
 
     # file path starts with double quote(")

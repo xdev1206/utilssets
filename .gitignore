@@ -7,3 +7,4 @@ env/share
 env/bin/ctags
 env/bin/optscript
 env/bin/readtags
+env/vim/docs

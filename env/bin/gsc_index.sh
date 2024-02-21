@@ -69,7 +69,8 @@ do
     a)
         searchdir=(${droid_dir[@]});;
     c)
-        searchdir=('.');;
+        dirs=$(find . -maxdepth 1 -mindepth 1 -type d -iname "[^.]*")
+        searchdir=(${dirs});;
     d)
         searchdir=(${searchdir[@]} $OPTARG);;
     r)

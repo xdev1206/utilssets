@@ -10,7 +10,7 @@ Usage:
 -p     ps info
 -s     dumpsys info
 -d     dumpstate info
--n NUM log file suffix
+-n NUM run times
 EOF
 
     echo
@@ -18,9 +18,10 @@ EOF
 
 function topinfo()
 {
-    echo "exec top -m 10 -n 1 -s cpu -t ..."
-    date >> ${log_dir}/top.log${log_suffix}
-    top -m 10 -n 1 -s cpu -t >> ${log_dir}/top.log${log_suffix}
+    echo "exec top -m 10 -n 1 -H ..."
+    date >> ${log_dir}/top.log
+    echo -e "\ntop, ${log_suffix}\n" >> ${log_dir}/top.log
+    top -m 10 -n 2 -d 1 >> ${log_dir}/top.log
 }
 
 function psinfo()
@@ -56,7 +57,7 @@ fi
 
 parameter=
 log_suffix=
-log_dir=/data/log
+log_dir=/data/local/tmp/log
 
 if [ ! -d ${log_dir} ]; then
     mkdir -p ${log_dir}
@@ -79,7 +80,7 @@ do
     d)
         parameter="${parameter} "d;;
     n)
-        log_suffix=$OPTARG;;
+        times=$OPTARG;;
     :)
         echo " $OPTARG missing option argument"
         echo;;
@@ -89,18 +90,22 @@ do
     esac
 done
 
-for var in $parameter
+for i in $(seq 0 ${times})
 do
-    case ${var} in
-    t)
-        topinfo;;
-    p)
-        psinfo;;
-    s)
-        dumpsys_respective;;
-    d)
-        dumpstateinfo;;
-    esac
+    log_suffix=${i}
+    for var in $parameter
+    do
+        case ${var} in
+        t)
+            topinfo;;
+        p)
+            psinfo;;
+        s)
+            dumpsys_respective;;
+        d)
+            dumpstateinfo;;
+        esac
+    done
 done
 
 echo "get system info finishes!"

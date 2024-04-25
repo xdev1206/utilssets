@@ -33,6 +33,9 @@ localectl set-locale LANG=en_US.UTF-8
 localectl set-locale LANGUAGE=en_US
 
 #update-alternatives --install
+#  --install <link> <name> <path> <priority>
+#   [--slave <link> <name> <path>] ...
+#                           add a group of alternatives to the system.
 ${SUDO} update-alternatives --install /usr/bin/python python /usr/local/bin/python3.8 70 \
     --slave /usr/bin/python3 python3 /usr/local/bin/python3.8 \
     --slave /usr/bin/python3-config python3-config /usr/local/bin/python3.8-config \

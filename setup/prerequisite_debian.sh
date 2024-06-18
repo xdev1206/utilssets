@@ -35,4 +35,4 @@ func_installing_status()
 
 ${SUDO} ${PKG_M} ${PKG_UPDATE}
 
-func_installing_status lsb-release git
+func_installing_status git lsb-release

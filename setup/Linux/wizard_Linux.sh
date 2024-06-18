@@ -108,16 +108,27 @@ ubuntu_sources()
     local codename=$(lsb_release -cs)
 
     $SUDO cat >> /etc/apt/sources.list << EOF
-deb http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ ${codename}-security main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ ${codename}-updates main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ ${codename}-proposed main restricted universe multiverse
-deb http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename} main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-security main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-proposed main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename} main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-updates main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-backports main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-security main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename}-proposed main restricted universe multiverse
+
+#deb http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ ${codename}-security main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ ${codename}-updates main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ ${codename}-proposed main restricted universe multiverse
+#deb http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ ${codename} main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-security main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-updates main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-proposed main restricted universe multiverse
+#deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse
 EOF
 
     $SUDO apt update
@@ -127,6 +138,9 @@ debian_sources()
 {
     $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
     local codename=$(lsb_release -cs)
+    if [ $? -ne 0 ]; then
+        echo "run cmd: lsb_release -cs failed, return"
+    fi
 
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
 deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-updates main contrib non-free non-free-firmware
@@ -167,7 +181,7 @@ func_installing_status build-essential openjdk-17-jdk \
     dos2unix libssl-dev libreadline-dev libsqlite3-dev gdb unzip autoconf \
     libyaml-dev libxml2-dev libseccomp-dev libjansson-dev python3-tk \
     python3-docutils python3-dev libbz2-dev liblzma-dev astyle zlib1g-dev \
-    libffi-dev inetutils-ping net-tools libtool libncurses-dev libu2f-udev \
+    libffi-dev inetutils-ping net-tools iptables iproute2 libtool libncurses-dev libu2f-udev \
     fonts-liberation fonts-noto-cjk
 
 func_bash_env

@@ -34,7 +34,6 @@ download_plugins()
     # install plug to manager plug-ins
     # curl -fLo $VIM_PATH/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     git clone https://github.com/junegunn/vim-plug.git
-    remove_tmp > /dev/null 2>&1
     cp ${VIM_TMP}/vim-plug/plug.vim ${VIM_PATH}/autoload
 
     echo "$VIM_PATH"

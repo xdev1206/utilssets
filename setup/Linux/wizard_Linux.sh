@@ -9,15 +9,20 @@ func_installing_status()
 
     echo "$@"
 
+    local error_pkg
     for pkg in "$@";
     do
         $SUDO ${INSTALL_CMD} ${pkg}
 
         if [ $? -ne 0 ]; then
-            echo -e "\nerror, failed to install: ${pkg}, exit...\n"
-            exit 1
+            echo -e "\nfailed to install: ${pkg}\n"
+            error_pkg="${error_pkg} ${pkg}"
         fi
     done
+
+    if [ "${error_pkg}xyzab" != "xyzab" ]; then
+        echo -e "\n\nwarning:\nfailed to install: ${error_pkg}\n\n"
+    fi
 }
 
 func_bash_env()

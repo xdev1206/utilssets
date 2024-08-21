@@ -1,27 +1,48 @@
 #!/bin/bash
 
-# env path
-ENV_SCRIPT_DIR=$(cd `dirname $BASH_SOURCE` && /bin/pwd)
-
-# BASH_RC
-# OS_NAME
-# OS_VERSION
-# INSTALL_CMD
-if [ "x${OS_NAME}" == "x" ]; then
-  source ${ENV_SCRIPT_DIR}/os_type.sh
+if [ -z "${BASH_VERSION:-}" ]; then
+    abort "Bash is required to interpret this script."
 fi
+
+# env path
+SCRIPT_DIR=$(cd `dirname $BASH_SOURCE` && /bin/pwd)
+source ${SCRIPT_DIR}/prerequisite.sh
 
 # ENV_ROOT
 # ENV_BIN
 # ENV_CONF
-if [ "x${ENV_ROOT}" == "x" ]; then
-  source ${ENV_SCRIPT_DIR}/path.sh
-fi
+function env_variable()
+{
+    # Check if script is run non-interactively (e.g. CI)
+    # If it is run non-interactively we should not prompt for passwords.
+    if [[ ! -t 0 || -n "${CI-}" ]]; then
+        NONINTERACTIVE=1
+    fi
 
-# reach_network
-if [ "x${reach_network}" == "x" ]; then
-  source ${ENV_SCRIPT_DIR}/reach_github.sh
-fi
+    ENV_ROOT=$(cd `dirname $BASH_SOURCE`/../../env && /bin/pwd)
+    ENV_BIN=${ENV_ROOT}/bin
+    ENV_CONF=$ENV_ROOT/config/env.conf
+
+    echo "ENV_ROOT: ${ENV_ROOT}"
+    echo "ENV_BIN: ${ENV_BIN}"
+    echo "ENV_CONF: ${ENV_CONF}"
+}
+
+# NETWORK
+function reach_github()
+{
+  local url="https://github.com"
+  local code=`curl -I -s ${url} -w %{http_code} | tail -n1`
+  if [ "x${code}" == "x200" ]; then
+    NETWORK=1
+    reach_network=1
+  else
+    NETWORK=0
+    reach_network=0
+  fi
+  echo "connecting to github.com, status: $reach_network, http_code: $code"
+  echo "NETWORK: ${reach_network}"
+}
 
 function setup_bash_env()
 {
@@ -75,5 +96,7 @@ EOF
     fi
 }
 
+env_variable
+reach_github
 setup_env_conf
 setup_bash_env

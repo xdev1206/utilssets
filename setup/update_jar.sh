@@ -1,8 +1,7 @@
 #!/bin/bash
 
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
-source ${SCRIPT_PATH}/os_type.sh
-source ${SCRIPT_PATH}/path.sh
+source ${SCRIPT_PATH}/env/env.sh
 
 JAR_PATH=${ENV_ROOT}/tool/jar
 

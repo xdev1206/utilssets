@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
-source $SCRIPT_PATH/env.sh
+source $SCRIPT_PATH/env/env.sh
 FZF_PATH=$ENV_ROOT/tool/fzf
 
 remove_tmp()

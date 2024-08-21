@@ -3,9 +3,8 @@
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
 
 if [ "x$OS_NAME" == "x" ]; then
-    source ${SCRIPT_PATH}/os_type.sh
+    source ${SCRIPT_PATH}/env/env.sh
 fi
-source $SCRIPT_PATH/path.sh
 
 PYENV_PATH=$ENV_ROOT/tool/pyenv
 PYENV_PATH_VIRENV=$PYENV_PATH/plugins/pyenv-virtualenv
@@ -63,7 +62,7 @@ python_env()
     remove_tmp > /dev/null 2>&1
 
     OS_TYPE=$(uname -s)
-    source $SCRIPT_PATH/$OS_TYPE/pyenv_$OS_TYPE.sh
+    source $SCRIPT_PATH/$OS_TYPE/pyenv_${OS_TYPE}.sh
 }
 
 python_env

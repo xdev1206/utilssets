@@ -11,6 +11,6 @@ fi
 # cur/bin/env path
 CUR_DIR=$(cd `dirname $BASH_SOURCE` && /bin/pwd)
 
-source ${CUR_DIR}/env.sh
+source ${CUR_DIR}/env/env.sh
 source ${CUR_DIR}/${OS_TYPE}/wizard_${OS_TYPE}.sh
 source ${CUR_DIR}/setup_vim.sh

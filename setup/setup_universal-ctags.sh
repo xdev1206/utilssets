@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
-source $SCRIPT_PATH/env.sh
+source $SCRIPT_PATH/env/env.sh
 
 git clone https://github.com/universal-ctags/ctags.git
 cd ctags

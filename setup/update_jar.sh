@@ -26,7 +26,7 @@ jar_env()
   wget https://sourceforge.net/projects/plantuml/files/plantuml.jar/download -O $JAR_PATH/plantuml.jar
   # create plantuml shell script
   echo -e '#!/bin/bash\n' > $ENV_BIN/plantuml
-  echo "java -jar $JAR_PATH/jar/plantuml.jar -tpng \$@" >> $ENV_BIN/plantuml
+  echo "java -jar $JAR_PATH/plantuml.jar -tpng \$@" >> $ENV_BIN/plantuml
   chmod 755 $ENV_BIN/plantuml
 }
 

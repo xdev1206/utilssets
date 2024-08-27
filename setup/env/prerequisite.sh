@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# UID
 # SUDO
 function sudo_variable()
 {
-    UID=$(id -u)
     if [ ${UID} -ne 0 ]; then
         SUDO=sudo
     fi

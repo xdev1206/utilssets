@@ -61,7 +61,7 @@ function os_variable()
         SUDO=''
         INSTALL_CMD='brew install'
         PKG_MANAGER="brew"
-        PKG_INSTALL="install -y"
+        PKG_INSTALL="install"
         PKG_UPDATE="update"
         if [ "${SHELL}" != "/bin/bash" ]; then
             echo "Please use bash as default interactive shell on ${OS_NAME}"
@@ -84,12 +84,16 @@ func_installing_status()
 
     echo "$@"
 
-    for pkg in "$@";
+    for cml in "$@";
     do
-        $SUDO ${PKG_MANAGER} ${PKG_INSTALL} ${pkg}
+        if [ -n "$(command -v ${cml})" ]; then
+            echo "${pkg} is alreay installed."
+            continue
+        fi
 
+        $SUDO ${PKG_MANAGER} ${PKG_INSTALL} ${cml}
         if [ $? -ne 0 ]; then
-            echo -e "\nerror, failed to install: ${pkg}, exit...\n"
+            echo -e "\nerror, failed to install: ${cml}, exit...\n"
             exit 1
         fi
     done

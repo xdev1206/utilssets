@@ -87,7 +87,7 @@ func_installing_status()
     for cml in "$@";
     do
         if [ -n "$(command -v ${cml})" ]; then
-            echo "${pkg} is alreay installed."
+            echo "${cml} is alreay installed."
             continue
         fi
 

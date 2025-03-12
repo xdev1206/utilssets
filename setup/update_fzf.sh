@@ -14,11 +14,18 @@ remove_tmp()
 update_fzf()
 {
 
-   rm -rf $FZF_PATH > /dev/null 2>&1
+    if [ ${NETWORK} -eq 1 ]; then
+        rm -rf $FZF_PATH > /dev/null 2>&1
 
-   git clone --depth 1 https://github.com/junegunn/fzf.git $FZF_PATH
-   remove_tmp > /dev/null 2>&1
-   $FZF_PATH/install
+        git clone --depth 1 https://github.com/junegunn/fzf.git $FZF_PATH
+        remove_tmp > /dev/null 2>&1
+    fi
+
+    if [ -d ${FZF_PATH} ]; then
+        $FZF_PATH/install
+    else
+        printf "\e[31m%s\e[0m" "not found ${FZF_PATH}"
+    fi
 }
 
 update_fzf

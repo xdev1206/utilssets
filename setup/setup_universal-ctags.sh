@@ -3,9 +3,12 @@
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
 source $SCRIPT_PATH/env/env.sh
 
-git clone https://github.com/universal-ctags/ctags.git
-cd ctags
-./autogen.sh
-./configure --prefix=${ENV_ROOT}
-make
-make install # may require extra privileges depending on where to install
+if [ ${NETWORK} -eq 1 ]; then
+    git clone https://github.com/universal-ctags/ctags.git
+    pushd ctags
+    ./autogen.sh
+    ./configure --prefix=${ENV_ROOT}
+    make
+    make install # may require extra privileges depending on where to install
+    popd
+fi

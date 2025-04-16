@@ -54,8 +54,14 @@ pyenv_to_conf()
 python_env()
 {
     if [ -f $PYENV_CONF ]; then
-        echo "has already setup python env, skip this step..."
-        return 0
+        found=$(cat $PYENV_CONF | grep "PYENV_PATH" | grep -ic ${PYENV_PATH})
+        if [ $found -gt 0 ]; then
+            echo "has already setup python env, skip this step..."
+            return 0
+        else
+            printf "%s" "delete antiquated conf: ${PYENV_CONF}.\n"
+            rm -r ${PYENV_CONF}
+        fi
     fi
 
     download_pyenv && pyenv_to_conf

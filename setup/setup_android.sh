@@ -52,8 +52,8 @@ function sdk_setup()
   ./cmdline-tools/bin/sdkmanager --sdk_root=. "ndk;23.2.8568313"
   ./cmdline-tools/bin/sdkmanager --sdk_root=. "platforms;android-25"
 
-  #complete_env_path ${ANDROID_ENV_PATH}/$sdk_dir/platform-tools
-  #complete_env_path ${ANDROID_ENV_PATH}/$sdk_dir/cmdline-tools/bin
+  complete_env_path ${ANDROID_ENV_PATH}/$sdk_dir/platform-tools
+  complete_env_path ${ANDROID_ENV_PATH}/$sdk_dir/cmdline-tools/bin
   if [ "$?" == "0" ]; then
       export_env ANDROID_SDK_ROOT ${ANDROID_ENV_PATH}/$sdk_dir
       export_env ANDROID_HOME ${ANDROID_ENV_PATH}/$sdk_dir

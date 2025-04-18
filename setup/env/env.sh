@@ -75,6 +75,30 @@ EOF
     fi
 }
 
+function export_env()
+{
+    if [ $# -ne 2 ]; then
+        echo "export_env: only support 2 parameter, error!"
+        exit 1
+    fi
+
+    env_name=$1
+    env_param=$2
+
+    found=$(cat ${ENV_CONF} | grep -c "${env_name}")
+    if [ $found -eq 0 ]; then
+        echo "export env: ${env_name}=${env_param}"
+        cat >> ${ENV_CONF} << EOF
+export ${env_name}=${env_param}
+EOF
+    else
+        echo "overwrite export env: ${env_name}=${env_param}"
+        env_name_escape_slash=${env_name//\//\\\/}
+        env_param_escape_slash=${env_param//\//\\\/}
+        sed  "s/export.*${env_name_escape_slash}.*$/${env_name_escape_slash}=${env_param_escape_slash}/g" -i ${ENV_CONF}
+    fi
+}
+
 function complete_env_path()
 {
     if [ $# -ne 1 ]; then

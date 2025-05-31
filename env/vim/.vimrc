@@ -168,7 +168,12 @@ let g:tagbar_sort = 0
 let g:tagbar_width = 30
 
 if has("cscope")
-    set csprg=/usr/bin/cscope
+    if filereadable('/usr/bin/cscope')
+        set csprg=/usr/bin/cscope
+    else
+        set csprg=$ENV_PATH/bin/cscope
+    endif
+
     set csto=1
     set cst
     " set csverb  " output verbose message and wait enter key

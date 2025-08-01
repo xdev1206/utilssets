@@ -11,7 +11,12 @@ APK=$1
 
 BUILD_TOOLS_VERSION=34.0.0
 ANDROID_SDK="/root/workspace/utilssets/env/android/sdk"
+
+AAPT2="${ANDROID_SDK}/build-tools/${BUILD_TOOLS_VERSION}/aapt2"
 APKSIGNER="${ANDROID_SDK}/build-tools/${BUILD_TOOLS_VERSION}/apksigner"
+
+echo "apk versionCode versionName"
+${AAPT2} dump badging ${APK} | grep -E "(versionCode|versionName)"
 
 # support v2
 echo "apksigner verify"

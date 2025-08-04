@@ -1,4 +1,4 @@
-" Copyright (c) 2013-2024 Junegunn Choi
+" Copyright (c) 2013-2025 Junegunn Choi
 "
 " MIT License
 "
@@ -198,6 +198,7 @@ function! s:compare_binary_versions(a, b)
   return s:compare_versions(s:get_version(a:a), s:get_version(a:b))
 endfunction
 
+let s:min_version = '0.53.0'
 let s:checked = {}
 function! fzf#exec(...)
   if !exists('s:exec')
@@ -225,7 +226,11 @@ function! fzf#exec(...)
     let s:exec = binaries[-1]
   endif
 
-  if a:0 && !has_key(s:checked, a:1)
+  let min_version = s:min_version
+  if a:0 && s:compare_versions(a:1, min_version) > 0
+    let min_version = a:1
+  endif
+  if !has_key(s:checked, min_version)
     let fzf_version = s:get_version(s:exec)
     if empty(fzf_version)
       let message = printf('Failed to run "%s --version"', s:exec)
@@ -233,17 +238,17 @@ function! fzf#exec(...)
       throw message
     end
 
-    if s:compare_versions(fzf_version, a:1) >= 0
-      let s:checked[a:1] = 1
+    if s:compare_versions(fzf_version, min_version) >= 0
+      let s:checked[min_version] = 1
       return s:exec
-    elseif a:0 < 2 && input(printf('You need fzf %s or above. Found: %s. Download binary? (y/n) ', a:1, fzf_version)) =~? '^y'
+    elseif a:0 < 2 && input(printf('You need fzf %s or above. Found: %s. Download binary? (y/n) ', min_version, fzf_version)) =~? '^y'
       let s:versions = {}
       unlet s:exec
       redraw
       call fzf#install()
-      return fzf#exec(a:1, 1)
+      return fzf#exec(min_version, 1)
     else
-      throw printf('You need to upgrade fzf (required: %s or above)', a:1)
+      throw printf('You need to upgrade fzf (required: %s or above)', min_version)
     endif
   endif
 
@@ -353,7 +358,7 @@ endfunction
 
 function! s:get_color(attr, ...)
   " Force 24 bit colors: g:fzf_force_termguicolors (temporary workaround for https://github.com/junegunn/fzf.vim/issues/1152)
-  let gui = get(g:, 'fzf_force_termguicolors', 0) || (!s:is_win && !has('win32unix') && has('termguicolors') && &termguicolors)
+  let gui = get(g:, 'fzf_force_termguicolors', 0) || (!s:is_win && !has('win32unix') && (has('gui_running') || has('termguicolors') && &termguicolors))
   let fam = gui ? 'gui' : 'cterm'
   let pat = gui ? '^#[a-f0-9]\+' : '^[0-9]\+$'
   for group in a:000
@@ -548,8 +553,15 @@ try
     let height = s:calc_size(&lines, dict.down, dict)
     let optstr .= ' --no-tmux --height='.height
   endif
-  " Respect --border option given in $FZF_DEFAULT_OPTS and 'options'
-  let optstr = join([s:border_opt(get(dict, 'window', 0)), s:extract_option($FZF_DEFAULT_OPTS, 'border'), optstr])
+
+  if exists('&winborder') && &winborder !=# '' && &winborder !=# 'none'
+    " Add 1-column horizontal margin
+    let optstr = join(['--margin 0,1', optstr])
+  else
+    " Respect --border option given in $FZF_DEFAULT_OPTS and 'options'
+    let optstr = join([s:border_opt(get(dict, 'window', 0)), s:extract_option($FZF_DEFAULT_OPTS, 'border'), optstr])
+  endif
+
   let command = prefix.(use_tmux ? s:fzf_tmux(dict) : fzf_exec).' '.optstr.' > '.temps.result
 
   if use_term
@@ -665,21 +677,17 @@ else
   let s:launcher = function('s:xterm_launcher')
 endif
 
-function! s:exit_handler(code, command, ...)
-  if a:code == 130
-    return 0
-  elseif has('nvim') && a:code == 129
-    " When deleting the terminal buffer while fzf is still running,
-    " Nvim sends SIGHUP.
-    return 0
-  elseif a:code > 1
+function! s:exit_handler(dict, code, command, ...)
+  if has_key(a:dict, 'exit')
+    call a:dict.exit(a:code)
+  endif
+  if a:code == 2
     call s:error('Error running ' . a:command)
     if !empty(a:000)
       sleep
     endif
-    return 0
   endif
-  return 1
+  return a:code
 endfunction
 
 function! s:execute(dict, command, use_height, temps) abort
@@ -731,7 +739,7 @@ function! s:execute(dict, command, use_height, temps) abort
   let exit_status = v:shell_error
   redraw!
   let lines = s:collect(a:temps)
-  return s:exit_handler(exit_status, command) ? lines : []
+  return s:exit_handler(a:dict, exit_status, command) < 2 ? lines : []
 endfunction
 
 function! s:execute_tmux(dict, command, temps) abort
@@ -746,7 +754,7 @@ function! s:execute_tmux(dict, command, temps) abort
   let exit_status = v:shell_error
   redraw!
   let lines = s:collect(a:temps)
-  return s:exit_handler(exit_status, command) ? lines : []
+  return s:exit_handler(a:dict, exit_status, command) < 2 ? lines : []
 endfunction
 
 function! s:calc_size(max, val, dict)
@@ -912,7 +920,7 @@ function! s:execute_term(dict, command, temps) abort
     endif
 
     let lines = s:collect(self.temps)
-    if !s:exit_handler(a:code, self.command, 1)
+    if s:exit_handler(self.dict, a:code, self.command, 1) >= 2
       return
     endif
 
@@ -1019,8 +1027,23 @@ if has('nvim')
     let buf = nvim_create_buf(v:false, v:true)
     let opts = extend({'relative': 'editor', 'style': 'minimal'}, a:opts)
     let win = nvim_open_win(buf, v:true, opts)
-    silent! call setwinvar(win, '&winhighlight', 'Pmenu:,Normal:Normal')
     call setwinvar(win, '&colorcolumn', '')
+
+    " Colors
+    try
+      call setwinvar(win, '&winhighlight', 'Pmenu:,Normal:Normal')
+      let rules = get(g:, 'fzf_colors', {})
+      if has_key(rules, 'bg')
+        let color = call('s:get_color', rules.bg)
+        if len(color)
+          let ns = nvim_create_namespace('fzf_popup')
+          let hl = nvim_set_hl(ns, 'Normal',
+                \ &termguicolors ? { 'bg': color } : { 'ctermbg': str2nr(color) })
+          call nvim_win_set_hl_ns(win, ns)
+        endif
+      endif
+    catch
+    endtry
     return buf
   endfunction
 else
@@ -1080,7 +1103,7 @@ endfunction
 
 function! s:cmd(bang, ...) abort
   let args = copy(a:000)
-  let opts = { 'options': ['--multi'] }
+  let opts = { 'options': ['--multi', '--scheme', 'path'] }
   if len(args) && isdirectory(expand(args[-1]))
     let opts.dir = substitute(substitute(remove(args, -1), '\\\(["'']\)', '\1', 'g'), '[/\\]*$', '/', '')
     if s:is_win && !&shellslash

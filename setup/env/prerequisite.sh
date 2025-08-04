@@ -25,7 +25,7 @@ function sudo_variable()
     fi
 }
 
-# BASH_RC
+# SHELL_RC
 # OS_NAME
 # OS_VERSION
 # INSTALL_CMD
@@ -34,10 +34,10 @@ function sudo_variable()
 # PKG_UPDATE
 function os_variable()
 {
-    BASH_RC="$HOME/.bashrc"
+    SHELL_RC="$HOME/.bashrc"
     OS_TYPE=$(uname -s)
     if [ "x${OS_TYPE}" == "xLinux" ]; then
-        BASH_RC="$HOME/.bashrc"
+        SHELL_RC="$HOME/.bashrc"
 
         if [ -f '/etc/centos-release' ]; then
             OS_NAME='centos'
@@ -70,7 +70,13 @@ function os_variable()
             abort "Can't recognize os type, abort."
         fi
     elif [ "x${OS_TYPE}" == "xDarwin" ]; then
-        BASH_RC="$HOME/.bash_profile"
+        echo "use shell:${SHELL} on ${OS_NAME} ${OS_VERSION}"
+        SHELL_RC="${HOME}/.zshrc"
+        if [ "${SHELL}" = "/bin/bash" ]; then
+            SHELL_RC="$HOME/.bash_profile"
+        elif [ "${SHELL}" = "/bin/zsh" ]; then
+            SHELL_RC="${HOME}/.zshrc"
+        fi
         OS_NAME=`sw_vers -productName`
         OS_VERSION=`sw_vers -productVersion`
 
@@ -80,13 +86,9 @@ function os_variable()
         PKG_MANAGER="brew"
         PKG_INSTALL="install"
         PKG_UPDATE="update"
-        if [ "${SHELL}" != "/bin/bash" ]; then
-            echo "Please use bash as default interactive shell on ${OS_NAME}"
-            exit 0
-        fi
     fi
 
-    echo "BASH_RC: ${BASH_RC}"
+    echo "SHELL_RC: ${SHELL_RC}"
     echo "OS_TYPE: $OS_TYPE"
     echo "OS_NAME: $OS_NAME"
     echo "OS_VERSION: $OS_VERSION"

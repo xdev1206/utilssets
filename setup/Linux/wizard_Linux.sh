@@ -27,21 +27,21 @@ func_installing_status()
 
 func_bash_env()
 {
-    alias_found=`cat $BASH_RC | grep -c "alias ll="`
+    alias_found=`cat $SHELL_RC | grep -c "alias ll="`
     if [ $alias_found -eq 0 ]; then
         # alias
-        echo -e "\nalias ll='ls -l --color=auto'" >> $BASH_RC
-        echo -e "alias la='ls -la --color=auto'" >> $BASH_RC
+        echo -e "\nalias ll='ls -l --color=auto'" >> $SHELL_RC
+        echo -e "alias la='ls -la --color=auto'" >> $SHELL_RC
     fi
 
-    ps1_found=$(cat ${BASH_RC} | grep -c "PS1")
+    ps1_found=$(cat ${SHELL_RC} | grep -c "PS1")
     if [ ${ps1_found} -eq 0 ]; then
         export PS1="\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h:\w\$\[\e[0m\] "
-        echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ${BASH_RC}
+        echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ${SHELL_RC}
     fi
 
     # force color prompt
-    sed 's/\#force_color_prompt=yes/force_color_prompt=yes/g' -i ${BASH_RC}
+    sed 's/\#force_color_prompt=yes/force_color_prompt=yes/g' -i ${SHELL_RC}
 }
 
 func_sudo_env()

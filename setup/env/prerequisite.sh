@@ -10,15 +10,56 @@ function printf_msg()
     printf "\e[31m%b%s\e[0m" "${msg}"
 }
 
+# Shell函数：检查shellrc中是否包含指定path_var字符串
+check_path_in_shellrc()
+{
+    local path_var="$1"
+    local shellrc="$2"
+
+    # 使用grep的-F参数进行固定字符串搜索，防止正则误判
+    # 使用-- "$path_var" 处理特殊字符和引号
+    if grep -F -- "$path_var" ~/${shellrc} > /dev/null; then
+        echo "$path_var: exists"
+        return 0
+    else
+        echo "$path_var: not found"
+        return 1
+    fi
+}
+
+darwin_cmd()
+{
+    if command -v brew >/dev/null 2>&1; then
+        echo "brew command exists!"
+        return
+    fi
+
+    echo "install homebrew command"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    local found=$(check_path_in_shellrc HOMEBREW_NO_AUTO_UPDATE ${SHELL_RC})
+    if [ "x${found}" = "x1" ]; then
+        echo 'export HOMEBREW_NO_AUTO_UPDATE=1' >> ~/.zshrc
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+    fi
+}
+
 # SUDO
 function sudo_variable()
 {
 
     if [ ${UID} -ne 0 ]; then
-        sudo_found=$(groups | grep -ic sudo)
+        # 判断是macOS还是Linux
+        if uname | grep -qi darwin; then
+            GROUP="admin"
+        else
+            GROUP="sudo"
+        fi
+
+        sudo_found=$(groups | grep -ic ${GROUP})
         if [ ${sudo_found} -eq 0 ]; then
             printf_msg "user doesn't in sudo group, can't run as privilege!\n"
-            SUDO="printf_msg \"can't run as privilege, skip!\n\" ; false &&"
+            SUDO='echo "can not run as privilege, skip!" >&2; false;'
         else
             SUDO=sudo
         fi
@@ -70,6 +111,9 @@ function os_variable()
             abort "Can't recognize os type, abort."
         fi
     elif [ "x${OS_TYPE}" == "xDarwin" ]; then
+        OS_NAME=`sw_vers -productName`
+        OS_VERSION=`sw_vers -productVersion`
+
         echo "use shell:${SHELL} on ${OS_NAME} ${OS_VERSION}"
         SHELL_RC="${HOME}/.zshrc"
         if [ "${SHELL}" = "/bin/bash" ]; then
@@ -77,8 +121,6 @@ function os_variable()
         elif [ "${SHELL}" = "/bin/zsh" ]; then
             SHELL_RC="${HOME}/.zshrc"
         fi
-        OS_NAME=`sw_vers -productName`
-        OS_VERSION=`sw_vers -productVersion`
 
         #Running Homebrew as root is extremely dangerous and no longer supported
         SUDO=''
@@ -86,6 +128,10 @@ function os_variable()
         PKG_MANAGER="brew"
         PKG_INSTALL="install"
         PKG_UPDATE="update"
+
+        echo "sudo is not necessary for brew command"
+        SUDO=""
+        darwin_cmd
     fi
 
     echo "SHELL_RC: ${SHELL_RC}"
@@ -105,7 +151,7 @@ func_installing_status()
 
     for cml in "$@";
     do
-        if [ -n "$(command -v ${cml})" ]; then
+        if command -v ${cml} >/dev/null 2>&1; then
             echo "${cml} is alreay installed."
             continue
         fi

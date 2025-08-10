@@ -12,19 +12,15 @@ shell_env()
   if [ ${ps1_found} -eq 0 ]; then
     export CLICOLOR=1
     export LSCOLORS=ExGxFxdaCxDaDahbadech
-    export HOMEBREW_NO_AUTO_UPDATE=1
     if [ "${SHELL}" = "/bin/bash" ]; then
         export PS1="\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h:\w\$\[\e[0m\] "
         echo 'export PS1="\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> ${SHELL_RC}
     elif [ "${SHELL}" = "/bin/zsh" ]; then
         export PS1="%F{green}%n@%f:%F{blue}%~%f%# "
         echo 'export PS1="%F{green}%n@%f:%F{blue}%~%f%# "' >> ${SHELL_RC}
+        echo 'autoload -Uz compinit' >> ${SHELL_RC}
+        echo 'compinit' >> ${SHELL_RC}
     fi
-  fi
-
-  brew_found=$(echo "$PATH" | grep -ic homebrew)
-  if [ $brew_found -eq 0 ]; then
-     echo "export PATH=\"/opt/homebrew/bin:$PATH\"" >> ${ENV_CONF}
   fi
 }
 

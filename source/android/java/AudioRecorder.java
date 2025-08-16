@@ -1,14 +1,15 @@
 package com.example.audio
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioRecorder {
@@ -17,333 +18,255 @@ public class AudioRecorder {
     // 音频配置参数
     private static final int SAMPLE_RATE = 16000; // 采样率
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO; // 单声道
-    private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT; // 16位PCM
-    private static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC; // 麦克风
+    private static final int ENCODING_FORMAT = AudioFormat.ENCODING_PCM_16BIT; // 16位PCM编码
 
-    // 录音相关
-    private AudioRecord audioRecord;
-    private int bufferSize;
+    // 录制状态
     private final AtomicBoolean isRecording = new AtomicBoolean(false);
     private final AtomicBoolean isInitialized = new AtomicBoolean(false);
+
+    // 音频录制相关
+    private AudioRecord audioRecord;
+    private int bufferSize;
     private byte[] audioBuffer;
-    private int audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
 
-    // 线程相关
-    private Thread audioThread;
-    private Thread recordThread;
-    private final Object threadLock = new Object();
+    // 线程管理
+    private ExecutorService audioThread;
+    private ExecutorService recordingThread;
 
-    // 监听器列表
+    // 监听器管理
     private final List<RecorderListener> listeners = new ArrayList<>();
-
+    private final Object listenerLock = new Object();
+    
     public interface RecorderListener {
-        void onAudioBuffer(byte[] data, int volume);
+        void onAudioBuffer(byte[] data, int dataSize);
+    }
+    
+    public AudioRecorder(int audioSource) {
+        audioThread = Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r, "AudioRecorder-Control");
+            thread.setDaemon(true);
+            return thread;
+        });
+
+        recordingThread = Executors.newSingleThreadExecutor(r -> {
+            Thread thread = new Thread(r, "AudioRecorder-Recording");
+            thread.setDaemon(true);
+            return thread;
+        });
+    }
+    
+    public synchronized void startRecord() {
+        if (isRecording.get()) {
+            Log.w(TAG, "Recording is already started");
+            return;
+        }
+
+        audioThread.execute(() -> {
+            try {
+                if (!isInitialized.get()) {
+                    initAudioRecord();
+                }
+
+                if (audioRecord != null && audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+                    audioRecord.startRecording();
+                    isRecording.set(true);
+
+                    // 启动录制线程
+                    startRecordingThread();
+
+                    Log.i(TAG, "Audio recording started successfully");
+                } else {
+                    Log.e(TAG, "Failed to start recording: AudioRecord not properly initialized");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error starting audio recording", e);
+                isRecording.set(false);
+            }
+        });
+    }
+    
+    public synchronized void stopRecord() {
+        if (!isRecording.get()) {
+            Log.w(TAG, "Recording is not started");
+            return;
+        }
+
+        audioThread.execute(() -> {
+            try {
+                isRecording.set(false);
+
+                if (audioRecord != null) {
+                    if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
+                        audioRecord.stop();
+                    }
+                    Log.i(TAG, "Audio recording stopped successfully");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error stopping audio recording", e);
+            }
+        });
     }
 
-    public AudioRecorder(int audioSource) {
-        this.audioSource = audioSource;
-        initAudioRecord();
+    /**
+     * 注册监听器
+     */
+    public void registerListener(RecorderListener cb) {
+        if (cb == null) {
+            Log.w(TAG, "Trying to register null listener");
+            return;
+        }
+
+        synchronized (listenerLock) {
+            if (!listeners.contains(cb)) {
+                listeners.add(cb);
+                Log.d(TAG, "Listener registered, total listeners: " + listeners.size());
+            }
+        }
+    }
+
+    /**
+     * 注销监听器
+     */
+    public void unregisterListener(RecorderListener cb) {
+        if (cb == null) {
+            Log.w(TAG, "Trying to unregister null listener");
+            return;
+        }
+
+        synchronized (listenerLock) {
+            if (listeners.remove(cb)) {
+                Log.d(TAG, "Listener unregistered, total listeners: " + listeners.size());
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
     private void initAudioRecord() {
-        audioThread = new Thread(() -> {
-            try {
-                Log.d(TAG, "create new AudioRecord instance");
+        try {
+            // 计算缓冲区大小
+            bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, ENCODING_FORMAT);
+            if (bufferSize == AudioRecord.ERROR_BAD_VALUE || bufferSize == AudioRecord.ERROR) {
+                Log.e(TAG, "Invalid buffer size: " + bufferSize);
+                return;
+            }
 
-                // 获取最小缓冲区大小
-                bufferSize = AudioRecord.getMinBufferSize(
-                        SAMPLE_RATE,
-                        CHANNEL_CONFIG,
-                        AUDIO_FORMAT
-                );
+            audioBuffer = new byte[bufferSize];
 
-                if (bufferSize == AudioRecord.ERROR_BAD_VALUE || bufferSize == AudioRecord.ERROR) {
-                    Log.e(TAG, "can't get valid min buffer size");
-                    return;
-                }
+            // 创建AudioRecord实例
+            audioRecord = new AudioRecord(
+                    MediaRecorder.AudioSource.MIC,
+                    SAMPLE_RATE,
+                    CHANNEL_CONFIG,
+                    ENCODING_FORMAT,
+                    bufferSize * 2
+            );
 
-                // 创建AudioRecord实例
-                audioRecord = new AudioRecord(
-                        AUDIO_SOURCE,
-                        SAMPLE_RATE,
-                        CHANNEL_CONFIG,
-                        AUDIO_FORMAT,
-                        bufferSize * 2 // 使用2倍缓冲区大小
-                );
-
-                // 检查AudioRecord状态
-                if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-                    Log.e(TAG, "AudioRecord initialized failed");
-                    audioRecord = null;
-                    return;
-                }
-
-                // 初始化音频缓冲区
-                audioBuffer = new byte[bufferSize];
+            if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
                 isInitialized.set(true);
-                Log.d(TAG, "AudioRecord init completed, min buffer size: " + bufferSize);
-
-            } catch (Exception e) {
-                Log.e(TAG, "AudioRecord init error:", e);
-                isInitialized.set(false);
+                Log.i(TAG, "AudioRecord initialized successfully, buffer size: " + bufferSize);
+            } else {
+                Log.e(TAG, "AudioRecord initialization failed");
+                releaseAudioRecord();
             }
-        }, "AudioInitThread");
-
-        audioThread.start();
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing AudioRecord", e);
+            releaseAudioRecord();
+        }
     }
 
-    public synchronized void startRecord() {
-        if (isRecording.get()) {
-            Log.w(TAG, "is recording, return");
-            return;
-        }
+    private void startRecordingThread() {
+        recordingThread.execute(() -> {
+            Log.d(TAG, "Recording thread started");
 
-        // 等待初始化完成
-        waitForInitialization();
-
-        if (!isInitialized.get()) {
-            Log.e(TAG, "AudioRecord isInitialized is false");
-            return;
-        }
-
-        Thread startThread = new Thread(() -> {
-            synchronized (threadLock) {
+            while (isRecording.get() && audioRecord != null) {
                 try {
-                    if (audioRecord == null) {
-                        Log.e(TAG, "AudioRecord is null");
-                        return;
-                    }
-
-                    if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-                        Log.e(TAG, "AudioRecord state is not STATE_INITIALIZED, return");
-                        return;
-                    }
-
-                    // 开始录音
-                    audioRecord.startRecording();
-                    isRecording.set(true);
-                    Log.d(TAG, "recording begins");
-
-                    // 开始读取音频数据
-                    startReadingAudioData();
-
-                } catch (Exception e) {
-                    Log.e(TAG, "startRecord Exception", e);
-                    isRecording.set(false);
-                }
-            }
-        }, "AudioStartThread");
-
-        startThread.start();
-    }
-
-    public synchronized void stopRecord() {
-        if (!isRecording.get()) {
-            Log.w(TAG, "isRecording is false, return");
-            return;
-        }
-
-        isRecording.set(false);
-
-        Thread stopThread = new Thread(() -> {
-            synchronized (threadLock) {
-                try {
-                    if (audioRecord != null) {
-                        audioRecord.stop();
-                        Log.d(TAG, "stop Record");
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "stop Record exception:", e);
-                }
-
-                // 等待录音线程结束
-                if (recordThread != null && recordThread.isAlive()) {
-                    try {
-                        recordThread.join(1000); // 最多等待1秒
-                    } catch (InterruptedException e) {
-                        Log.w(TAG, "等待录音线程结束时被中断", e);
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            }
-        }, "AudioStopThread");
-
-        stopThread.start();
-    }
-
-    private void startReadingAudioData() {
-        recordThread = new Thread(() -> {
-            Log.d(TAG, "开始读取音频数据线程");
-
-            while (isRecording.get()) {
-                try {
-                    if (audioRecord == null || !isRecording.get()) {
-                        break;
-                    }
-
-                    // 读取音频数据
                     int bytesRead = audioRecord.read(audioBuffer, 0, bufferSize);
 
                     if (bytesRead > 0) {
-                        // 计算音量
-                        int volume = calculateVolume(audioBuffer, bytesRead);
-
-                        // 创建数据副本
-                        byte[] dataCopy = new byte[bytesRead];
-                        System.arraycopy(audioBuffer, 0, dataCopy, 0, bytesRead);
-
-                        // 通知监听器
-                        notifyListeners(dataCopy, volume);
-                    } else if (bytesRead < 0) {
-                        Log.e(TAG, "读取音频数据失败，错误码: " + bytesRead);
+                        // 通知所有监听器
+                        notifyListeners(audioBuffer, bytesRead);
+                    } else if (bytesRead == AudioRecord.ERROR_INVALID_OPERATION) {
+                        Log.e(TAG, "AudioRecord read error: ERROR_INVALID_OPERATION");
+                        break;
+                    } else if (bytesRead == AudioRecord.ERROR_BAD_VALUE) {
+                        Log.e(TAG, "AudioRecord read error: ERROR_BAD_VALUE");
                         break;
                     }
-
-                    // 短暂休眠，避免过度占用CPU
-                    Thread.sleep(1);
-
-                } catch (InterruptedException e) {
-                    Log.d(TAG, "录音线程被中断");
-                    Thread.currentThread().interrupt();
-                    break;
                 } catch (Exception e) {
-                    Log.e(TAG, "读取音频数据时发生异常", e);
+                    Log.e(TAG, "Error reading audio data", e);
                     break;
                 }
             }
 
-            Log.d(TAG, "音频数据读取线程结束");
-        }, "AudioRecordThread");
-
-        recordThread.start();
+            Log.d(TAG, "Recording thread stopped");
+        });
     }
 
-    private void waitForInitialization() {
-        if (audioThread != null && audioThread.isAlive()) {
-            try {
-                audioThread.join(3000); // 最多等待3秒
-            } catch (InterruptedException e) {
-                Log.d(TAG, "等待初始化时被中断", e);
-                Thread.currentThread().interrupt();
+    private void notifyListeners(byte[] data, int dataSize) {
+        synchronized (listenerLock) {
+            if (!listeners.isEmpty()) {
+                // 创建数据副本以避免并发修改
+                byte[] dataCopy = new byte[dataSize];
+                System.arraycopy(data, 0, dataCopy, 0, dataSize);
+
+                for (RecorderListener listener : listeners) {
+                    try {
+                        listener.onAudioBuffer(dataCopy, dataSize);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error notifying listener", e);
+                    }
+                }
             }
         }
     }
 
-    private int calculateVolume(byte[] data, int length) {
-        long sum = 0;
-        for (int i = 0; i < length; i += 2) {
-            // 16位PCM数据，每两个字节组成一个样本
-            if (i + 1 < length) {
-                short sample = (short) ((data[i + 1] << 8) | (data[i] & 0xFF));
-                sum += Math.abs(sample);
-            }
-        }
-
-        if (length > 0) {
-            return (int) (sum / (length / 2));
-        }
-        return 0;
-    }
-
-    private void notifyListeners(byte[] data, int volume) {
-        List<RecorderListener> listenersCopy;
-        synchronized (listeners) {
-            listenersCopy = new ArrayList<>(listeners);
-        }
-
-        for (RecorderListener listener : listenersCopy) {
+    private void releaseAudioRecord() {
+        audioThread.execute(() -> {
             try {
-                listener.onAudioBuffer(data, volume);
+                if (audioRecord != null) {
+                    if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
+                        audioRecord.stop();
+                    }
+                    audioRecord.release();
+                    audioRecord = null;
+                    Log.i(TAG, "AudioRecord released");
+                }
+                isInitialized.set(false);
+                isRecording.set(false);
             } catch (Exception e) {
-                Log.e(TAG, "通知监听器时发生异常", e);
+                Log.e(TAG, "Error releasing AudioRecord", e);
             }
-        }
+        });
     }
 
-    public void registerListener(RecorderListener cb) {
-        if (cb == null) {
-            Log.w(TAG, "监听器为null，无法注册");
-            return;
-        }
+    /**
+     * 销毁录制器，释放所有资源
+     */
+    public void destroy() {
+        Log.i(TAG, "Destroying AudioRecorder");
 
-        synchronized (listeners) {
-            if (!listeners.contains(cb)) {
-                listeners.add(cb);
-                Log.d(TAG, "监听器注册成功，当前监听器数量: " + listeners.size());
-            } else {
-                Log.w(TAG, "监听器已存在，无需重复注册");
-            }
-        }
-    }
-
-    public void unregisterListener(RecorderListener cb) {
-        if (cb == null) {
-            Log.w(TAG, "监听器为null，无法注销");
-            return;
-        }
-
-        synchronized (listeners) {
-            if (listeners.remove(cb)) {
-                Log.d(TAG, "监听器注销成功，当前监听器数量: " + listeners.size());
-            } else {
-                Log.w(TAG, "监听器不存在，无法注销");
-            }
-        }
-    }
-
-    public void release() {
-        Log.d(TAG, "开始释放资源");
-
-        // 停止录音
+        // 停止录制
         stopRecord();
 
-        // 在独立线程中释放AudioRecord
-        Thread releaseThread = new Thread(() -> {
-            synchronized (threadLock) {
-                try {
-                    // 等待所有操作完成
-                    if (audioThread != null && audioThread.isAlive()) {
-                        audioThread.join(1000);
-                    }
-
-                    if (recordThread != null && recordThread.isAlive()) {
-                        recordThread.interrupt();
-                        recordThread.join(1000);
-                    }
-
-                    // 释放AudioRecord
-                    if (audioRecord != null) {
-                        try {
-                            audioRecord.release();
-                            audioRecord = null;
-                            Log.d(TAG, "AudioRecord已释放");
-                        } catch (Exception e) {
-                            Log.e(TAG, "释放AudioRecord时发生异常", e);
-                        }
-                    }
-
-                } catch (InterruptedException e) {
-                    Log.w(TAG, "等待线程结束时被中断", e);
-                    Thread.currentThread().interrupt();
-                } catch (Exception e) {
-                    Log.e(TAG, "释放资源时发生异常", e);
-                }
-            }
-        }, "AudioReleaseThread");
-
-        releaseThread.start();
-
         // 清空监听器
-        synchronized (listeners) {
+        synchronized (listenerLock) {
             listeners.clear();
         }
 
-        // 重置状态
-        isRecording.set(false);
-        isInitialized.set(false);
+        // 释放AudioRecord
+        releaseAudioRecord();
 
-        Log.d(TAG, "资源释放完成");
+        // 关闭线程池
+        if (audioThread != null && !audioThread.isShutdown()) {
+            audioThread.shutdown();
+            audioThread = null;
+        }
+        if (recordingThread != null && !recordingThread.isShutdown()) {
+            recordingThread.shutdown();
+            recordingThread = null;
+        }
+
+        Log.i(TAG, "AudioRecorder destroyed");
     }
 
     public boolean isRecording() {
@@ -352,13 +275,5 @@ public class AudioRecorder {
 
     public boolean isInitialized() {
         return isInitialized.get();
-    }
-
-    public int getSampleRate() {
-        return SAMPLE_RATE;
-    }
-
-    public int getBufferSize() {
-        return bufferSize;
     }
 }

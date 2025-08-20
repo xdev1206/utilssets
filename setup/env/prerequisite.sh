@@ -156,7 +156,7 @@ func_installing_status()
             continue
         fi
 
-        eval $SUDO ${PKG_MANAGER} ${PKG_INSTALL} ${cml}
+        $SUDO ${PKG_MANAGER} ${PKG_INSTALL} ${cml}
         if [ $? -ne 0 ]; then
             printf_msg "\nerror, failed to install: ${cml}, exit...\n"
             continue

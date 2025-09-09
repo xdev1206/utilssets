@@ -1,11 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if [ -z "${BASH_VERSION:-}" ]; then
-    abort "Bash is required to interpret this script."
-fi
+# 获取脚本目录的兼容函数
+function get_script_dir() {
+    if [ -n "$BASH_VERSION" ]; then
+        echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    elif [ -n "$ZSH_VERSION" ]; then
+        echo "$(cd "$(dirname "${(%):-%x}")" && pwd)"
+    else
+        echo "$(cd "$(dirname "$0")" && pwd)"
+    fi
+}
 
-# env path
-SCRIPT_DIR=$(cd `dirname $BASH_SOURCE` && /bin/pwd)
+# 获取脚本目录并切换
+SCRIPT_DIR=$(get_script_dir)
 source ${SCRIPT_DIR}/prerequisite.sh
 
 # ENV_ROOT

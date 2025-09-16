@@ -1,5 +1,6 @@
 scriptencoding utf-8
 
+set nofixendofline
 set encoding=utf-8                       " 编码设置
 set nocompatible                         " 去除vi一致性
 set runtimepath^=$VIM_PATH

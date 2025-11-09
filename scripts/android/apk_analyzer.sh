@@ -7,16 +7,25 @@ fi
 
 rm -rf tmp
 
+set -e
+
 APK=$1
 
-BUILD_TOOLS_VERSION=34.0.0
-ANDROID_SDK="/root/workspace/utilssets/env/android/sdk"
+SDK_BUILD_TOOLS_VERSION=$(find ${ANDROID_SDK_ROOT}/build-tools -mindepth 1 -maxdepth 1 -type d | head -n 1 | xargs basename)
+SDK_CMD_TOOLS=${ANDROID_SDK_ROOT}/cmdline-tools
 
-AAPT2="${ANDROID_SDK}/build-tools/${BUILD_TOOLS_VERSION}/aapt2"
-APKSIGNER="${ANDROID_SDK}/build-tools/${BUILD_TOOLS_VERSION}/apksigner"
+AAPT2="${ANDROID_SDK_ROOT}/build-tools/${SDK_BUILD_TOOLS_VERSION}/aapt2"
+APKSIGNER="${ANDROID_SDK_ROOT}/build-tools/${SDK_BUILD_TOOLS_VERSION}/apksigner"
+APKANALYZER="${SDK_CMD_TOOLS}/latest/bin/apkanalyzer"
 
-echo "apk versionCode versionName"
+echo "apk aapt2 dump versionCode versionName"
 ${AAPT2} dump badging ${APK} | grep -E "(versionCode|versionName)"
+
+echo "apk aapt2 dump targetSdkVersion"
+${AAPT2} dump badging ${APK} | grep -i targetSdkVersion
+
+echo "apk apkanalyzer targetSdkVersion"
+${APKANALYZER} manifest target-sdk ${APK}
 
 # support v2
 echo "apksigner verify"
@@ -31,7 +40,7 @@ keytool -printcert -jarfile ${APK}
 echo "jarsigner -verify -certs"
 jarsigner -verify -certs ${APK}
 
-unzip -q ${APK} -d tmp
+unzip -qo ${APK} -d tmp
 
 pushd tmp
 

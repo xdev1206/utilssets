@@ -169,4 +169,4 @@ ${SUDO} ${PKG_MANAGER} ${PKG_UPDATE}
 sudo_variable
 os_variable
 
-func_installing_status git lsb-release curl
+func_installing_status git curl wget lsb-release

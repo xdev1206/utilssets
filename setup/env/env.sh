@@ -102,7 +102,14 @@ EOF
         echo "overwrite export env: ${env_name}=${env_param}"
         env_name_escape_slash=${env_name//\//\\\/}
         env_param_escape_slash=${env_param//\//\\\/}
-        sed  "s/export.*${env_name_escape_slash}.*$/export ${env_name_escape_slash}=${env_param_escape_slash}/g" -i ${ENV_CONF}
+
+        if [[ "${OS_TYPE}" == "Darwin" ]]; then
+            # macOS BSD sed
+            sed -i '' "s/^export[[:space:]]\+${env_name_escape_slash}=.*$/export ${env_name_escape_slash}=${env_param_escape_slash}/" "$ENV_CONF"
+        else
+            # Linux GNU sed
+            sed -i "s/^export[[:space:]]\+${env_name_escape_slash}=.*$/export ${env_name_escape_slash}=${env_param_escape_slash}/" "$ENV_CONF"
+        fi
     fi
 }
 

@@ -24,14 +24,15 @@ function android_env_dir()
 
 function sdk_setup()
 {
-  ${SUDO} apt update
-  ${SUDO} apt install openjdk-17-jdk
   android_env_dir
   pushd ${ANDROID_ENV_PATH}/$sdk_dir
 
   if [ "x${OS_TYPE}" == "xDarwin" ]; then
+      ${SUDO} ${PKG_MANAGER} ${PKG_INSTALL} openjdk@21
       cmdlinetools_zip_url=${cmdlinetools_mac_url}
   elif [ "x${OS_TYPE}" == "xLinux" ]; then
+      ${SUDO} ${PKG_MANAGER} ${PKG_UPDATE}
+      ${SUDO} ${PKG_MANAGER} ${PKG_INSTALL} openjdk-21-jdk
       cmdlinetools_zip_url=${cmdlinetools_linux_url}
   else
       cmdlinetools_zip_url=${cmdlinetools_linux_url}

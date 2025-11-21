@@ -169,4 +169,8 @@ ${SUDO} ${PKG_MANAGER} ${PKG_UPDATE}
 sudo_variable
 os_variable
 
-func_installing_status git curl wget lsb-release
+if [ "x${OS_TYPE}" == "xDarwin" ]; then
+    func_installing_status git curl wget
+else
+    func_installing_status git curl wget lsb-release
+fi

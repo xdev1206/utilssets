@@ -29,6 +29,7 @@ function env_variable()
     ENV_ROOT=$(cd `dirname $BASH_SOURCE`/../../env && /bin/pwd)
     ENV_BIN=${ENV_ROOT}/bin
     ENV_CONF=$ENV_ROOT/config/env.conf
+    ENV_PATH_CONF=$ENV_ROOT/config/path.conf
 
     echo "ENV_ROOT: ${ENV_ROOT}"
     echo "ENV_BIN: ${ENV_BIN}"
@@ -66,75 +67,92 @@ function setup_bash_env()
     fi
 }
 
-function setup_env_conf()
-{
-    local found=0
-    # avoid add 'export PATH=${ENV_PATH}/bin:${PATH}' into env.conf repeatly
-    found=$(cat "$ENV_CONF" | grep -c "ENV_PATH")
-
-    if [ $found -eq 0 ]; then
-        cat <<EOF >> $ENV_CONF
-found=\$(echo "\$PATH" | grep -c "\$ENV_PATH")
-if [ \$found -eq 0 ]; then
-    export PATH=\${ENV_PATH}/bin:\${PATH}
-fi
-EOF
-    fi
-}
-
 function export_env()
 {
+    # 1. 参数数量检查
     if [ $# -ne 2 ]; then
-        echo "export_env: only support 2 parameter, error!"
-        exit 1
+        echo "export_env: only support 2 parameters: <env_name> <env_value>" >&2
+        return 1
     fi
 
-    env_name=$1
-    env_param=$2
+    local env_name="$1"
+    local env_param="$2"
 
-    found=$(cat ${ENV_CONF} | grep -c "${env_name}")
-    if [ $found -eq 0 ]; then
-        echo "export env: ${env_name}=${env_param}"
-        cat >> ${ENV_CONF} << EOF
-export ${env_name}=${env_param}
-EOF
-    else
+    # 2. 确保 ENV_CONF 变量已定义
+    if [ -z "$ENV_CONF" ]; then
+        echo "export_env: ENV_CONF is not set!" >&2
+        return 1
+    fi
+
+    # 3. 如果文件不存在就创建
+    if [ ! -f "$ENV_CONF" ]; then
+        echo "export_env: creating config file $ENV_CONF"
+        touch "$ENV_CONF"
+    fi
+
+    # 4. 精确匹配环境变量名（避免 MY_JAVA_HOME 匹配到 JAVA_HOME）
+    local pattern="^export[[:space:]]+${env_name}="
+
+    if grep -qE "$pattern" "$ENV_CONF"; then
         echo "overwrite export env: ${env_name}=${env_param}"
-        env_name_escape_slash=${env_name//\//\\\/}
-        env_param_escape_slash=${env_param//\//\\\/}
 
-        if [[ "${OS_TYPE}" == "Darwin" ]]; then
-            # macOS BSD sed
-            sed -i '' "s/^export[[:space:]]\+${env_name_escape_slash}=.*$/export ${env_name_escape_slash}=${env_param_escape_slash}/" "$ENV_CONF"
-        else
-            # Linux GNU sed
-            sed -i "s/^export[[:space:]]\+${env_name_escape_slash}=.*$/export ${env_name_escape_slash}=${env_param_escape_slash}/" "$ENV_CONF"
-        fi
+        # 转义斜杠以保证 sed 替换安全
+        local env_name_escape=${env_name//\//\\\/}
+        local env_param_escape=${env_param//\//\\\/}
+
+        # 检测操作系统类型（macOS 与 Linux 处理 sed 不同）
+        case "$(uname -s)" in
+            Darwin)
+                sed -i '' "s|^export[[:space:]]\+${env_name_escape}=.*$|export ${env_name_escape}=${env_param_escape}|" "$ENV_CONF"
+                ;;
+            *)
+                sed -i "s|^export[[:space:]]\+${env_name_escape}=.*$|export ${env_name_escape}=${env_param_escape}|" "$ENV_CONF"
+                ;;
+        esac
+    else
+        echo "export env: ${env_name}=${env_param}"
+        echo "export ${env_name}=${env_param}" >> "$ENV_CONF"
     fi
 }
 
 function complete_env_path()
 {
     if [ $# -ne 1 ]; then
-        echo "complete_env_path: only support 1 parameter, error!"
-        exit 1
+        echo "Usage: complete_env_path <path>"
+        return 1
     fi
 
-    envpath=$1
-    found=$(cat ${ENV_CONF} | grep -c "${envpath}")
-    if [ $found -eq 0 ]; then
-        cat >> ${ENV_CONF} << EOF
-found=\$(echo "\$PATH" | grep -c "${envpath}")
-if [ \$found -eq 0 ]; then
-  export PATH=${envpath}:\${PATH}
-fi
-EOF
-    else
-        echo "env path: ${envpath} already exists in ${ENV_CONF}"
+    local envpath="$1"
+
+    if [ -z "${ENV_PATH_CONF}" ]; then
+        echo "Error: ENV_PATH_CONF is not set or does not exist"
+        return 1
     fi
+
+    if [ ! -f "${ENV_PATH_CONF}" ]; then
+        echo "complete_env_path: creating path config file $ENV_PATH_CONF"
+        touch "$ENV_PATH_CONF"
+    fi
+
+    # 检查配置文件中是否已经有这个路径
+    if grep -Fq "${envpath}" "${ENV_PATH_CONF}"; then
+        echo "env path: ${envpath} already exists in ${ENV_PATH_CONF}"
+        return 0
+    fi
+
+    {
+        echo ""
+        echo "# Add ${envpath} to PATH if not already in"
+        echo "case \":\$PATH:\" in"
+        echo "    *:${envpath}:*) ;;"
+        echo "    *) export PATH=\"${envpath}:\$PATH\" ;;"
+        echo "esac"
+    } >> "${ENV_PATH_CONF}"
+
+    echo "Added ${envpath} to ${ENV_PATH_CONF}"
 }
 
 env_variable
 reach_github
-setup_env_conf
+complete_env_path ${ENV_PATH}/bin
 setup_bash_env

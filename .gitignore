@@ -3,6 +3,7 @@ env/bin/ctags
 env/bin/optscript
 env/bin/readtags
 env/config/env.conf
+env/config/path.conf
 env/config/pyenv.conf
 env/tool/pyenv
 env/tool/fzf

@@ -32,6 +32,17 @@ hostnamectl
 localectl set-locale LANG=en_US.UTF-8
 localectl set-locale LANGUAGE=en_US
 
+sudo apt-get update
+sudo apt-get install locales-all #如果没有locale-gen，先安装
+sudo apt-get install locales
+sudo locale-gen zh_CN.UTF-8
+sudo update-locale
+sudo localedef -i en_US -f UTF-8 en_US.UTF-8
+
+export LANG=en_US.UTF-8 #设置环境变量使用英文locale（仍支持中文显示）
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+
 #update-alternatives --install
 #  --install <link> <name> <path> <priority>
 #   [--slave <link> <name> <path>] ...

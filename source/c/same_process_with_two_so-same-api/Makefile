@@ -8,10 +8,11 @@ SONAME = -Wl,-soname,
 TARGET1 = test1
 TARGET2 = test2
 TARGET_AUTO = test_auto
+TARGET_THREAD = test_thread
 
 LIBS = libc1.so libc2.so liba.so libb.so
 
-all: $(LIBS) $(TARGET1) $(TARGET2) $(TARGET_AUTO)
+all: $(LIBS) $(TARGET1) $(TARGET2) $(TARGET_AUTO) $(TARGET_THREAD)
 
 # 编译 libc1.so
 libc1.so: libc1.c
@@ -38,6 +39,9 @@ $(TARGET2): test2.c liba.so libb.so
 $(TARGET_AUTO): test_auto.c liba.so libb.so
 	$(CC) test_auto.c -L. -la -lb $(RPATH) -o $@
 
+$(TARGET_THREAD): test_thread.c liba.so libb.so
+	$(CC) test_thread.c -L. -la -lb $(RPATH) -lpthread -o $@
+
 # 运行测试
 run1: $(TARGET1)
 	LD_LIBRARY_PATH=. ./$(TARGET1)
@@ -50,7 +54,12 @@ run_auto: $(TARGET_AUTO)
 	readelf -d libb.so | grep -i needed
 	LD_LIBRARY_PATH=. ./$(TARGET_AUTO)
 
+run_thread: $(TARGET_THREAD)
+	readelf -d liba.so | grep -i needed
+	readelf -d libb.so | grep -i needed
+	LD_LIBRARY_PATH=. ./$(TARGET_THREAD)
+
 # 清理
 clean:
-	rm -f $(TARGET1) $(TARGET2) $(TARGET_AUTO) $(LIBS)
+	rm -f $(TARGET1) $(TARGET2) $(TARGET_AUTO) $(TARGET_THREAD) $(LIBS)
 

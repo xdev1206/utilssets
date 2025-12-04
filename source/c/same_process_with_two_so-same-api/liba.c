@@ -2,7 +2,7 @@
 #include "libc1.h"
 
 void call_a() {
-    printf("liba calling foo(): ");
+    printf("liba calling foo():\n");
     foo();
 }
 

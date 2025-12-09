@@ -84,9 +84,9 @@ set cindent                      " c 语言语法缩进，good
 " C/C++ indent options, help cinoptions-values
 set cinoptions=(0,W8,U0,:0,g0,l1,t0,N-4,E-4
 
-set list                  " 显示不可视字符 , 如tab符号，行结尾符号 ， nolist 不显示
-" [ 二合字母：显示行尾的空格，:help dig
-set listchars=trail:~
+set list                 " 显示不可视字符 , 如tab符号，行结尾符号 ， nolist 不显示
+" :help dig 二合字母帮助，:digraphs 列出所有 digraph
+set listchars=trail:~    " 显示行尾的空格，:help dig
 
 set listchars+=tab:>-  " [二合字母：crtl+k  14]    +: append listchars setting， tab will be showed as >----
 

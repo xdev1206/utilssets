@@ -18,3 +18,27 @@ source ${CUR_DIR}/${OS_TYPE}/wizard_${OS_TYPE}.sh
 # non-os releated
 source ${CUR_DIR}/setup_vim.sh
 source ${CUR_DIR}/update_fzf.sh
+
+download_repo_tool() {
+    if [ "${NETWORK}" = "0" ]; then
+        echo "Error: Network is unavailable. Please check your network connection."
+        return 1
+    fi
+
+    if [ -f "${ENV_BIN}/repo" ]; then
+        echo "repo tool already exists at ${ENV_BIN}/repo"
+        return 0
+    fi
+
+    if command -v wget >/dev/null 2>&1; then
+        wget https://storage.googleapis.com/git-repo-downloads/repo -O ${ENV_BIN}/repo
+        chmod +x ${ENV_BIN}/repo
+        echo "repo tool downloaded to ${ENV_BIN}/repo"
+    else
+        echo "Error: wget is not installed. Please install wget first."
+        return 1
+    fi
+}
+
+
+download_repo_tool

@@ -2,6 +2,7 @@ env/android/
 env/bin/ctags
 env/bin/optscript
 env/bin/readtags
+env/bin/repo
 env/config/env.conf
 env/config/path.conf
 env/config/pyenv.conf

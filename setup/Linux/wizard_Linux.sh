@@ -106,6 +106,11 @@ func_android_env() {
 
 ubuntu_sources()
 {
+    if ! command -v lsb_release >/dev/null 2>&1; then
+        echo "lsb_release not found, skip this step"
+	return
+    fi
+
     $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
     local codename=$(lsb_release -cs)
 
@@ -138,6 +143,11 @@ EOF
 
 debian_sources()
 {
+    if ! command -v lsb_release >/dev/null 2>&1; then
+        echo "lsb_release not found, skip this step"
+	return
+    fi
+
     $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
     local codename=$(lsb_release -cs)
     if [ $? -ne 0 ]; then

@@ -164,13 +164,13 @@ func_installing_status()
     done
 }
 
-${SUDO} ${PKG_MANAGER} ${PKG_UPDATE}
-
 sudo_variable
 os_variable
+
+${SUDO} ${PKG_MANAGER} ${PKG_UPDATE}
 
 if [ "x${OS_TYPE}" == "xDarwin" ]; then
     func_installing_status git curl wget
 else
-    func_installing_status git curl wget lsb-release
+    func_installing_status git curl wget lsb-release vim
 fi

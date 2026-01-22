@@ -39,14 +39,19 @@ function env_variable()
 # NETWORK
 function reach_github()
 {
+  NETWORK=0
+  reach_network=0
+
+  if ! command -v curl >/dev/null 2>&1; then
+      echo "lsb_release not found, skip this step"
+      return
+  fi
+
   local url="https://github.com"
   local code=`curl --connect-timeout 10 -I -s ${url} -w %{http_code} | tail -n1`
   if [ "x${code}" == "x200" ]; then
     NETWORK=1
     reach_network=1
-  else
-    NETWORK=0
-    reach_network=0
   fi
   printf_msg "connecting to github.com, status: $reach_network, http_code: $code\n"
   printf_msg "NETWORK: ${reach_network}\n"

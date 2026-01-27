@@ -3,6 +3,7 @@ project(audio_sdk LANGUAGES C CXX)
 
 option(BUILD_TEST "Build tests" OFF)
 
+add_subdirectory(esp_fft)
 add_subdirectory(kissfft)
 add_subdirectory(kaldi-native-fbank)
 

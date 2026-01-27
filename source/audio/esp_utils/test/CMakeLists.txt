@@ -7,8 +7,8 @@ target_include_directories(feat_test PUBLIC
 
 target_compile_features(feat_test PRIVATE cxx_std_14)
 
-target_link_libraries(feat_test PRIVATE kaldi-native-fbank)
-target_link_libraries(feat_test PRIVATE esp_fft)
+target_link_libraries(feat_test PRIVATE audio)
+target_link_libraries(feat_test PRIVATE dl_fft)
 
 # 输出到 build/bin
 set_target_properties(feat_test PROPERTIES

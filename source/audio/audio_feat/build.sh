@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+mkdir -p build
+pushd build
+
+#cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_ESP_FFT=ON -DKALDI_FBANK_BUILD_SHARED=ON -DESP_FFT_BUILD_SHARED=ON -DKISSFFT_BUILD_SHARED=ON -DBUILD_TEST=ON ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DKALDI_FBANK_BUILD_SHARED=ON -DESP_FFT_BUILD_SHARED=ON -DKISSFFT_BUILD_SHARED=ON -DBUILD_TEST=ON ..
+
+make
+popd
+
+PROJ=$(cd `dirname $0` && pwd)
+export LD_LIBRARY_PATH=${PROJ}/build/lib
+
+${PROJ}/build/bin/feat_test

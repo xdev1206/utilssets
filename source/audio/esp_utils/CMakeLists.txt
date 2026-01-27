@@ -24,6 +24,7 @@ add_custom_target(export_root_headers ALL
 
 add_subdirectory(dl_fft)
 add_subdirectory(audio)
+add_subdirectory(test)
 
 add_dependencies(dl_fft export_root_headers)
 add_dependencies(audio export_root_headers)

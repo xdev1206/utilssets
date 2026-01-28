@@ -159,5 +159,5 @@ function complete_env_path()
 
 env_variable
 reach_github
-complete_env_path ${ENV_PATH}/bin
+complete_env_path ${ENV_ROOT}/bin
 setup_bash_env

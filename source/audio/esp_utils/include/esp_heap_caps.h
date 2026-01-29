@@ -1,6 +1,7 @@
 #ifndef __ESP_HEAP_CAPS_H_
 #define __ESP_HEAP_CAPS_H_
 
+#include <stdint.h>
 #include <stdlib.h>
 
 /**

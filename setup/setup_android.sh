@@ -24,6 +24,7 @@ function android_env_dir()
 
 function sdk_setup()
 {
+  ndk_version=29.0.14206865
   android_env_dir
   pushd ${ANDROID_ENV_PATH}/$sdk_dir
 
@@ -50,13 +51,14 @@ function sdk_setup()
   ./cmdline-tools/bin/sdkmanager --sdk_root=. "build-tools;34.0.0"
   ./cmdline-tools/bin/sdkmanager --sdk_root=. "platform-tools"
   ./cmdline-tools/bin/sdkmanager --sdk_root=. "cmdline-tools;latest"
-  ./cmdline-tools/bin/sdkmanager --sdk_root=. "ndk;23.2.8568313"
+  ./cmdline-tools/bin/sdkmanager --sdk_root=. "ndk;${ndk_version}"
   ./cmdline-tools/bin/sdkmanager --sdk_root=. "platforms;android-25"
 
   complete_env_path ${ANDROID_ENV_PATH}/$sdk_dir/platform-tools
   complete_env_path ${ANDROID_ENV_PATH}/$sdk_dir/cmdline-tools/bin
   if [ "$?" == "0" ]; then
       export_env ANDROID_SDK_ROOT ${ANDROID_ENV_PATH}/$sdk_dir
+      export_env ANDROID_NDK_HOME ${ANDROID_ENV_PATH}/$sdk_dir/ndk/${ndk_version}
       export_env ANDROID_HOME ${ANDROID_ENV_PATH}/$sdk_dir
   fi
   popd

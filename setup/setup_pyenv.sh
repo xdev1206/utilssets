@@ -1,5 +1,13 @@
 #!/bin/sh
 
+if (eval '[[ 1 -eq 1 ]]') 2>/dev/null; then
+    : # bash / zsh / ksh
+else
+    echo "Error: This script does not support dash. Please run it with bash:"
+    echo "  bash $0"
+    exit 1
+fi
+
 SCRIPT_PATH=$(cd `dirname $BASH_SOURCE[0]` && /bin/pwd)
 
 if [ "x$OS_NAME" == "x" ]; then

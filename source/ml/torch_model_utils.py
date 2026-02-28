@@ -209,24 +209,23 @@ def export_model_raw_bin(model):
 
 
 class LayerOutputSaver:
-    def __init__(
-        self,
-        model,
-        save_dir="layer_outputs",
-        save_format="pt",      # "pt" or "npy"
-        cpu=True,
-        skip_container=True    # 是否跳过 Sequential / ModuleList 等容器
-    ):
+    def __init__(self, model, save_dir="layer_outputs", save_format="pt",
+            skip_container=True):
+        """
+        save_format "pt" or "npy" or "txt"
+        skip_container True 跳过 Sequential / ModuleList 等容器
+        """
         self.model = model
         self.save_dir = save_dir
         self.save_format = save_format
-        self.cpu = cpu
         self.skip_container = skip_container
 
         self.handles = []
         self.outputs = {}
 
         os.makedirs(save_dir, exist_ok=True)
+
+        self.register()
 
     def _is_container(self, module):
         return isinstance(
@@ -239,9 +238,7 @@ class LayerOutputSaver:
     def _hook(self, name):
         def fn(module, inputs, output):
             if torch.is_tensor(output):
-                out = output.detach()
-                if self.cpu:
-                    out = out.cpu()
+                out = output.detach().cpu()
                 self.outputs[name] = out
         return fn
 
@@ -255,6 +252,7 @@ class LayerOutputSaver:
 
             handle = module.register_forward_hook(self._hook(name))
             self.handles.append(handle)
+            print(f"register_forward_hook {name}")
 
     def clear(self):
         """清空本次 forward 的缓存"""
@@ -272,16 +270,14 @@ class LayerOutputSaver:
 
         for name, out in self.outputs.items():
             safe_name = name.replace(".", "_")
-            path = os.path.join(
-                self.save_dir,
-                f"{prefix}{safe_name}.{self.save_format}"
-            )
-
-            save_tensor_to_txt(out, name + ".txt")
+            path = os.path.join(self.save_dir,
+                    f"{prefix}{safe_name}.{self.save_format}"            )
 
             if self.save_format == "pt":
                 torch.save(out, path)
             elif self.save_format == "npy":
                 np.save(path, out.numpy())
-            else:
-                raise ValueError("save_format 只支持 pt 或 npy")
+            else: # txt
+                save_tensor_to_txt(out, path)
+
+            print(f"saving {path} done")

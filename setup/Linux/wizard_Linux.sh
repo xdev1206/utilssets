@@ -108,7 +108,7 @@ ubuntu_sources()
 {
     if ! command -v lsb_release >/dev/null 2>&1; then
         echo "lsb_release not found, skip this step"
-	return
+        return
     fi
 
     $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
@@ -145,7 +145,7 @@ debian_sources()
 {
     if ! command -v lsb_release >/dev/null 2>&1; then
         echo "lsb_release not found, skip this step"
-	return
+        return
     fi
 
     $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk

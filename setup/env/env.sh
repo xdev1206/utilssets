@@ -26,14 +26,17 @@ function env_variable()
         NONINTERACTIVE=1
     fi
 
-    ENV_ROOT=$(cd `dirname $BASH_SOURCE`/../../env && /bin/pwd)
+    UTILS_ROOT=$(cd `dirname $BASH_SOURCE`/../.. && /bin/pwd)
+    ENV_ROOT=${UTILS_ROOT}/env
     ENV_BIN=${ENV_ROOT}/bin
     ENV_CONF=$ENV_ROOT/config/env.conf
     ENV_PATH_CONF=$ENV_ROOT/config/path.conf
+    ENV_PY_UTILS=${UTILS_ROOT}/source/pyutils
 
     echo "ENV_ROOT: ${ENV_ROOT}"
     echo "ENV_BIN: ${ENV_BIN}"
     echo "ENV_CONF: ${ENV_CONF}"
+    echo "ENV_PY_UTILS: ${ENV_PY_UTILS}"
 }
 
 # NETWORK
@@ -122,12 +125,13 @@ function export_env()
 
 function complete_env_path()
 {
-    if [ $# -ne 1 ]; then
-        echo "Usage: complete_env_path <path>"
+    if [ $# -ne 2 ]; then
+        echo "Usage: complete_env_path env_name(like PATH) <path>"
         return 1
     fi
 
-    local envpath="$1"
+    local envname="$1"
+    local envpath="$2"
 
     if [ -z "${ENV_PATH_CONF}" ]; then
         echo "Error: ENV_PATH_CONF is not set or does not exist"
@@ -147,10 +151,9 @@ function complete_env_path()
 
     {
         echo ""
-        echo "# Add ${envpath} to PATH if not already in"
-        echo "case \":\$PATH:\" in"
+        echo "case \":\$${envname}:\" in"
         echo "    *:${envpath}:*) ;;"
-        echo "    *) export PATH=\"${envpath}:\$PATH\" ;;"
+        echo "    *) export ${envname}=\"${envpath}:\$${envname}\" ;;"
         echo "esac"
     } >> "${ENV_PATH_CONF}"
 
@@ -159,5 +162,6 @@ function complete_env_path()
 
 env_variable
 reach_github
-complete_env_path ${ENV_ROOT}/bin
+complete_env_path PATH ${ENV_ROOT}/bin
+complete_env_path PYTHONPATH ${ENV_PY_UTILS}
 setup_bash_env

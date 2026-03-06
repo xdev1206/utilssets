@@ -50,3 +50,5 @@ shell_env()
 
 install_package
 shell_env
+
+source keybindings.sh

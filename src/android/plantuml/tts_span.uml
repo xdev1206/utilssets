@@ -1,0 +1,22 @@
+@startuml
+interface CharSequence
+interface ParcelableSpan
+interface Parcelable
+interface Spannable
+interface Spanned
+
+abstract class  SpannableStringInternal
+
+class TtsSpan
+class SpannableString
+
+CharSequence <|.. Spanned
+Spanned <|-- Spannable
+Spannable o-- TtsSpan
+Parcelable <|.. ParcelableSpan
+ParcelableSpan <|.. TtsSpan
+
+SpannableStringInternal <|-- SpannableString
+Spannable <|.. SpannableString
+CharSequence <|.. SpannableString
+@enduml

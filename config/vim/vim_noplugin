@@ -1,0 +1,167 @@
+scriptencoding utf-8
+
+set nofixendofline
+set encoding=utf-8                       " 编码设置
+set modelines=0                          " 禁用模式行（安全措施）
+
+set number                               " 显示行号
+
+set splitright                           " 设置左右分割窗口时，新窗口出现在右侧
+set splitbelow                           " 设置水平分割窗口时，新窗口出现在底部
+
+set nobackup                             " 不需要备份
+set autoread                             " 文件自动检测外部更改
+set clipboard=unnamed                    " 共享剪切板
+
+set ambiwidth=double                     " 解决中文标点显示的问题
+set nowrap                               " 不自动折行
+
+set sm!                                  " 高亮显示匹配括号
+set hlsearch                             " 高亮查找匹配
+set ignorecase smartcase  " 搜索时忽略大小写，但在有一个或以上大写字母时仍保持对大小写敏感
+set wrapscan              " 搜索到文件两端时重新搜索
+set incsearch             " 输入搜索内容时就显示搜索结果
+
+set showmatch                            " 显示匹配
+set ruler                                " 显示标尺，在右下角显示光标位置
+set novisualbell                         " 不要闪烁
+set showcmd                              " 显示输入的命令
+
+set fileformat=unix      " e ++f=unix %
+set fileformats=unix
+set fileencodings=utf8,ucs-bom,gbk,cp936,gb2312,gb18030
+set cc=80                " vim7.3默认提供了colorcolumn，即在第80列显示红色宽度线, cuc 表示将当前光标下的列高亮
+set updatetime=1000      " 设定更新.swp 文件时间，milliseconds，此值影响taglist插件更新快慢
+set smarttab
+set shiftwidth=4         " 设定 << 和 >> 命令移动时的宽度为 4, code auto indent width
+set softtabstop=4        " 使得按退格键时可以一次删掉 4 个空格
+set tabstop=8            " 设定 tab 长度为 4
+set number               " 显示行号
+set showmatch            " 插入括号时，短暂地跳转到匹配的对应括号
+set matchtime=2          " 短暂跳转到匹配括号的时间
+set matchpairs+=<:>      " Characters that form pairs
+
+set vb t_vb=
+
+" 设置光标样式-------------------------------
+let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+
+set backspace=indent,eol,start           " 允许用退格键删除字符
+set guifont=Hack_Nerd_Font_Mono:h16      " 设置字体和字体大小, 只对gui客户端起作用，终端使用需要修改终端字体和大小
+" 禁止显示滚动条
+set guioptions-=l
+set guioptions-=L
+set guioptions-=r
+set guioptions-=R
+" 禁止显示菜单和工具条
+set guioptions-=m
+set guioptions-=T
+
+set wildmenu              " vim 自身命令行模式智能补全
+set autoindent
+set smartindent
+set cindent                      " c 语言语法缩进，good
+" C/C++ indent options, help cinoptions-values
+set cinoptions=(0,W8,U0,:0,g0,l1,t0,N-4,E-4
+
+set list                 " 显示不可视字符 , 如tab符号，行结尾符号 ， nolist 不显示
+" :help dig 二合字母帮助，:digraphs 列出所有 digraph
+set listchars=trail:~    " 显示行尾的空格，:help dig
+
+set listchars+=tab:>-  " [二合字母：crtl+k  14]    +: append listchars setting， tab will be showed as >----
+
+set laststatus=2       " 显示状态栏 (默认值为 1, 无法显示状态栏), 设为1则窗口数多于一个的时候
+                       " 显示最后一个窗口的状态行；0不显示最后一个窗口的状态行
+filetype on          " 开启文件类型侦测
+filetype plugin on   " 根据侦测到的不同类型加载对应的插件
+filetype plugin indent on
+" 将指定文件类型，空格自动转换为tab，手动使用以下命令
+" :set expandtab
+" :retab     ** command mode
+autocmd FileType h,c,cpp,cxx,cc,java,sh,py,kt setlocal expandtab
+autocmd BufNewFile,BufRead *.py let g:indentLine_enabled=1 " for indentLine
+
+" filetype plugin on, then turns on omni completion
+set completeopt=preview,menu
+
+function! WindowNumber()
+    let num=tabpagewinnr(tabpagenr())
+        return num
+endfunction
+
+set laststatus=2                         " always show statusline
+"set showtabline=2                        " always show tabline
+set statusline=%<%F%M%r\ [%{&fileformat}][%{&fileencoding?&fileencoding:&encoding}]%=\ %l:%c\ %p%%\ win:%{WindowNumber()}
+" 设置状态行-----------------------------------
+" 设置状态行显示常用信息
+" %F 完整文件路径名
+" %m 当前缓冲被修改标记
+" %m 当前缓冲只读标记
+" %h 帮助缓冲标记
+" %w 预览缓冲标记
+" %Y 文件类型
+" %b ASCII值
+" %B 十六进制值
+" %l 行数
+" %v 列数
+" %p 当前行数占总行数的的百分比
+" %L 总行数
+" %{...} 评估表达式的值，并用值代替
+" %{"[fenc=".(&fenc==""?&enc:&fenc).((exists("+bomb") && &bomb)?"+":"")."]"} 显示文件编码
+" %{&ff} 显示文件类型
+
+set nocompatible
+syntax on
+syntax enable        " 打开语法的颜色显示 (turn on syntax color) 只会设置没有设置过的组
+set background=dark
+
+set notermguicolors
+if has('termguicolors') " 只在明确支持 truecolor 的终端开启
+    if ($COLORTERM ==# 'truecolor' || $COLORTERM ==# '24bit')
+        set termguicolors
+    endif
+endif
+
+if &t_Co >= 256 || has('termguicolors')
+    set cursorline
+    highlight CursorLine ctermbg=237 guibg=#3c3836
+endif
+
+highlight Search ctermbg=179 ctermfg=235
+highlight Visual ctermbg=239
+
+if has("cscope")
+    if filereadable('/usr/bin/cscope')
+        set csprg=/usr/bin/cscope
+    else
+        set csprg=$ENV_PATH/bin/cscope
+    endif
+
+    set csto=1
+    set cst
+    " set csverb  " output verbose message and wait enter key
+    set cspc=10
+    set nocscopeverbose
+    if filereadable("cscope.out")    "add any database in current dir
+        cs add cscope.out . -C
+    else    "else search cscope.out elsewhere
+        let cscope_file=findfile("cscope.out", ".;")
+        let cscope_pre=matchstr(cscope_file, ".*/")
+        if !empty(cscope_file) && filereadable(cscope_file)        "echo cscope_file
+            exe "cs add" cscope_file cscope_pre "-C"
+        endif
+    endif
+endif
+
+
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif	"离开插入模式后自动关闭预览窗口
+inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"	" 回车即选中当前项
+" 快捷键绑定-------------------------
+let mapleader='\'
+
+set maxmempattern=100000
+augroup LargeFile
+  autocmd!
+  autocmd BufReadPre * if getfsize(expand("%")) > 100000 | syntax off | set noswapfile | endif
+augroup END

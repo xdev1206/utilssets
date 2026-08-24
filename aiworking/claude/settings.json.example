@@ -5,12 +5,12 @@
     "deny": [ ]
   },
   "env": {
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "xxx",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "xxx",
-    "ANTHROPIC_AUTH_TOKEN": "xxxx",
-    "ANTHROPIC_BASE_URL": "https://xxxxx",
-    "ANTHROPIC_MODEL": "xxx",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "xxx",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "model_name_here",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "model_name_here",
+    "ANTHROPIC_AUTH_TOKEN": "token_here",
+    "ANTHROPIC_BASE_URL": "https://api.anthropic.com",
+    "ANTHROPIC_MODEL": "model_name_here",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "model_name_here",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1,
     "API_TIMEOUT_MS": "3000000"
   },

@@ -177,6 +177,8 @@ sandbox_mode = "danger-full-access"
 name = "Azure"
 base_url = "https://example.ai.com/v1"
 wire_api = "responses"
+# Export CODEX_API_KEY before running Codex with this custom provider.
+env_key = "CODEX_API_KEY"
 EOF
         echo "Generated demo ${local_config_file}"
     fi

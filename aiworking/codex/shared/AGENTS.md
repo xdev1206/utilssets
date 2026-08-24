@@ -60,6 +60,14 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Project Docs Index
+
+**Projects created from this standard environment should keep a root `docs/README.md` as the document index.**
+
+- Create `docs/README.md` in the project root when the project starts keeping docs under `docs/`.
+- Every time a new file is added under the project's `docs/`, update `docs/README.md` in the same change.
+- Keep `docs/README.md` minimal: list each document and its purpose.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

@@ -105,6 +105,9 @@ bash install/darwin/wizard_Darwin.sh
 # Linux only
 bash install/linux/wizard_Linux.sh
 
+# Install Claude Code CLI + shared ~/.claude config
+bash install/common/setup_claude_cli.sh
+
 # Install Codex CLI + NVM + Node
 bash install/common/setup_codex_cli.sh
 
@@ -192,9 +195,26 @@ Follow the pattern used by existing scripts:
 3. Use `export_env NAME value` to persist env vars to `config/shell/env.conf`
 4. Use `complete_env_path PATH /some/path` to add to PATH in `config/shell/path.conf`
 
+## Claude Config (aiworking/claude/)
+
+`aiworking/claude/` is the standard Claude workspace in this repo.
+
+Standard structure:
+- `aiworking/claude/README.md` — Claude workspace overview and standard layout
+- `aiworking/claude/CLAUDE.md` — shared Claude instructions copied into `~/.claude/CLAUDE.md`
+- `aiworking/claude/settings.json.example` — tracked settings template without machine-local secrets
+- `aiworking/claude/local/` — untracked machine-local Claude settings such as `settings.json`
+- `aiworking/claude/.claude/` — shared Claude agents and skills copied into `~/.claude/`
+
+As part of the standard environment used by `install/common/setup_claude_cli.sh`, generated projects should include a root `docs/README.md`.
+Use that project-level `docs/README.md` as the index for documents under the project's `docs/` directory, and update it whenever a new document is added there.
+`install/common/setup_claude_cli.sh` installs Claude Code and syncs the shared/local Claude files above into `~/.claude/`.
+
 ## Codex Config (aiworking/codex/)
 
 `aiworking/codex/shared/` contains public Codex config files copied into `~/.codex/` during installation.
 `aiworking/codex/local/` is reserved for untracked machine/account-specific files such as `auth.json`, `config.toml`, or future private extensions.
 If `aiworking/codex/local/` is missing `auth.json` or `config.toml`, `install/common/setup_codex_cli.sh` generates demo placeholders there before syncing.
+For Codex 0.148+ custom providers, the generated `config.toml` includes `env_key = "CODEX_API_KEY"` so the provider sends an authorization header explicitly instead of relying on `auth.json` fallback behavior from older versions; users still need to export `CODEX_API_KEY` in their shell environment before launching Codex.
 `install/common/setup_codex_cli.sh` only copies files into `~/.codex/` when the target path does not already exist.
+Projects created from this standard environment should also include a root `docs/README.md`; every time a new file is added under that project's `docs/`, update `docs/README.md` to keep the document index current.

@@ -5,14 +5,46 @@ description: Stage all changes, generate a Conventional Commits message from the
 
 Follow these steps exactly. Do not skip steps or batch them unless noted.
 
-## Step 1 — Decrypt token
+## Step 1 — Load or save token
 
-Decrypt the GitHub token at runtime with:
+Use an existing `GH_TOKEN` environment variable if present.
+
+Otherwise, load it from the untracked local file:
 
 ```bash
-GH_TOKEN=$(echo "U2FsdGVkX18njnMawu1cm99A1SK8Dr7ldP5ohunCOvj3O8yfoiy36lLQ6QK9TBhv
-O0qq36OtloDjBAyZAN7x/A==" | openssl enc -aes-256-cbc -d -base64 -pass pass:utilssets -pbkdf2 2>/dev/null)
+TOKEN_FILE="aiworking/github/local/token.env"
+if [ -z "${GH_TOKEN:-}" ] && [ -f "$TOKEN_FILE" ]; then
+  # shellcheck disable=SC1090
+  . "$TOKEN_FILE"
+fi
 ```
+
+Expected file content:
+
+```bash
+export GH_TOKEN='github_pat_xxx'
+```
+
+If `GH_TOKEN` is still empty after this step:
+
+1. Ask the user for a GitHub token
+2. Save it to `aiworking/github/local/token.env`
+3. Set file mode to `600`
+4. Load it into the current shell
+
+Use:
+
+```bash
+mkdir -p aiworking/github/local
+cat > aiworking/github/local/token.env <<'EOF'
+export GH_TOKEN='the_token_from_user'
+EOF
+chmod 600 aiworking/github/local/token.env
+# shellcheck disable=SC1090
+. aiworking/github/local/token.env
+```
+
+Do not print the token back to the user after saving it.
 
 ## Step 2 — Inspect changes
 
@@ -97,7 +129,8 @@ EOF
 
 ## Step 7 — Push
 
-Configure the remote to use the token (do not persist credentials to disk):
+Configure the remote to use the token for this push only (do not persist
+credentials to disk):
 
 ```bash
 REMOTE_URL=$(git remote get-url origin)
@@ -115,6 +148,7 @@ After a successful push, print the remote URL and the commit hash.
 
 ## Error handling
 
-- If `git push` fails with 403/401 → tell the user the token in SKILL.md may be expired and needs to be replaced
+- If `git push` fails with 403/401 → tell the user the saved `GH_TOKEN`
+  may be missing, expired, or missing repo push permission
 - If `git push` fails with rejected (non-fast-forward) → tell the user to pull/rebase first, do NOT force push
 - Never use `--force` or `--no-verify`

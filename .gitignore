@@ -51,3 +51,5 @@ config/shell/
 codex_resume
 aiworking/codex/local/**
 !aiworking/codex/local/.gitkeep
+aiworking/github/local/**
+!aiworking/github/local/.gitkeep

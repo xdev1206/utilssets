@@ -13,9 +13,10 @@ fi
 echo "Detected shell profile: ${SHELL_RC}"
 
 CLAUDE_DIR="${HOME}/.claude"
-CLAUDE_SHARED_DIR="${SCRIPT_DIR}/../../aiworking/claude/.claude"
-CLAUDE_TEMPLATE_DIR="${SCRIPT_DIR}/../../aiworking/claude"
+CLAUDE_SHARED_DIR="${SCRIPT_DIR}/../../aiworking/claude/shared/.claude"
+CLAUDE_TEMPLATE_DIR="${SCRIPT_DIR}/../../aiworking/claude/shared"
 CLAUDE_LOCAL_DIR="${SCRIPT_DIR}/../../aiworking/claude/local"
+SHARED_SKILLS_DIR="${SCRIPT_DIR}/../../aiworking/shared/skills"
 
 install_cli() {
     if command -v claude >/dev/null 2>&1; then
@@ -30,6 +31,7 @@ install_cli() {
 copy_tree_if_missing() {
     local source_dir="$1"
     local label="$2"
+    local target_root="${3:-${CLAUDE_DIR}}"
     local source_path relative_path target_path
 
     if [ ! -d "${source_dir}" ]; then
@@ -39,7 +41,7 @@ copy_tree_if_missing() {
 
     while read -r source_path; do
         relative_path="${source_path#${source_dir}/}"
-        target_path="${CLAUDE_DIR}/${relative_path}"
+        target_path="${target_root}/${relative_path}"
         if [ -e "${target_path}" ]; then
             echo "Skipping existing ${target_path}"
             continue
@@ -92,6 +94,7 @@ mkdir -p "${CLAUDE_DIR}"
 
 install_cli
 copy_tree_if_missing "${CLAUDE_SHARED_DIR}" "shared Claude config"
+copy_tree_if_missing "${SHARED_SKILLS_DIR}" "shared skills" "${CLAUDE_DIR}/skills"
 copy_file_if_missing "${CLAUDE_TEMPLATE_DIR}/CLAUDE.md" "${CLAUDE_DIR}/CLAUDE.md" "shared Claude instructions"
 setup_claude_settings
 

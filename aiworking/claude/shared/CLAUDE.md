@@ -26,8 +26,17 @@ Shared Claude instructions for projects created from this repository.
 - For bug fixes, reproduce the bug first, then make the check pass.
 - For non-trivial work, state a short step-by-step plan and verify each step.
 
-## 5. Project Docs Index
+## 5. Documentation Sync
 
+- After code changes, update the affected docs in the same turn.
+- If you add, rename, or remove a file referenced in `README.md`, `CLAUDE.md`, or `AGENTS.md`, update the reference.
+- Keep paired instruction files in sync: apply the same rule change to all paired copies (`CLAUDE.md` / `AGENTS.md` and their deployed copies) in the same turn.
 - Keep a root `docs/README.md` as the index for documents under `docs/`.
 - Every time a new file is added under `docs/`, update `docs/README.md` in the same change.
-- Keep `docs/README.md` minimal: list each document and its purpose.
+- Keep `docs/README.md` minimal: list each document and its purpose, one line per entry.
+- Skip doc updates for trivial or temporary changes.
+
+## 6. Change Summary Output
+
+- After each modification, output a structured summary in this order: modification overview, specific change points (diff or code snippets), documentation update summary.
+- This applies to all code changes, not just large refactors.

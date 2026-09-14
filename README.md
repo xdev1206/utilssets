@@ -37,6 +37,7 @@ utilssets/
 │   ├── common/            # Common installers
 │   ├── darwin/            # macOS-specific
 │   └── linux/             # Linux-specific
+├── aiworking/              # AI tool config workspace (shared / claude / codex / github)
 └── docs/                   # Documentation
 ```
 
@@ -105,6 +106,11 @@ bash install/linux/wizard_Linux.sh
 - Docker container management
 - Git/Gerrit utilities
 - System administration tools
+
+### AI Workspace (aiworking/)
+- Tool-neutral shared skills: `shared/skills/` (→ `~/.claude/skills/` and `~/.codex/skills/`)
+- Per-tool AI configs: `claude/` (→ `~/.claude/`), `codex/` (→ `~/.codex/`), `github/` (local token for the `github-commit` skill)
+- See [aiworking/README.md](aiworking/README.md)
 
 ## Requirements
 

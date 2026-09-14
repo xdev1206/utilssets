@@ -120,12 +120,14 @@ setup_cli
 CODEX_DIR="${HOME}/.codex"
 CODEX_SHARED_DIR="${SCRIPT_DIR}/../../aiworking/codex/shared"
 CODEX_LOCAL_DIR="${SCRIPT_DIR}/../../aiworking/codex/local"
+SHARED_SKILLS_DIR="${SCRIPT_DIR}/../../aiworking/shared/skills"
 
 mkdir -p "${CODEX_DIR}"
 
 copy_codex_tree_if_missing() {
     local source_dir="$1"
     local label="$2"
+    local target_root="${3:-${CODEX_DIR}}"
     local source_path relative_path target_path
 
     if [ ! -d "${source_dir}" ]; then
@@ -135,7 +137,7 @@ copy_codex_tree_if_missing() {
 
     while read -r source_path; do
         relative_path="${source_path#${source_dir}/}"
-        target_path="${CODEX_DIR}/${relative_path}"
+        target_path="${target_root}/${relative_path}"
         if [ -e "${target_path}" ]; then
             echo "Skipping existing ${target_path}"
             continue
@@ -186,6 +188,7 @@ EOF
 }
 
 copy_codex_tree_if_missing "${CODEX_SHARED_DIR}" "shared Codex config"
+copy_codex_tree_if_missing "${SHARED_SKILLS_DIR}" "shared skills" "${CODEX_DIR}/skills"
 ensure_local_codex_demo_files
 copy_codex_tree_if_missing "${CODEX_LOCAL_DIR}" "local Codex config"
 

@@ -105,7 +105,7 @@ Rules for `<description>`:
 feat(install): add setup_tmux script for color config
 fix(android): handle missing pid in cpu_mem_info loop
 chore(config): update vimrc plugin settings
-docs: add CLAUDE.md with project architecture notes
+docs: add CLAUDE.md/AGENTS.md with project architecture notes
 feat(ml)!: replace onnx export API — removes legacy kwargs
 ```
 

@@ -5,16 +5,14 @@
 ```text
 aiworking/claude/
 ├── README.md                    # 这个目录的说明文档
-├── CLAUDE.md                    # 同步到 ~/.claude/CLAUDE.md 的公共指令
-├── settings.json.example        # 不含真实密钥的共享设置模板
-├── local/
-│   ├── .gitkeep                 # 占位文件
-│   └── settings.json            # 本机私有 Claude 设置（gitignore）
-├── .claude/
-│   ├── agents/                  # 同步到 ~/.claude/agents/ 的共享子代理
-│   └── skills/                  # 同步到 ~/.claude/skills/ 的共享技能
-└── skills/
-    └── */SKILL.md               # 仓库内维护的 Claude 技能源码
+├── shared/                      # 同步到 ~/.claude/ 的共享配置（与 aiworking/codex/shared/ 配对）
+│   ├── CLAUDE.md                # 同步到 ~/.claude/CLAUDE.md 的公共指令
+│   ├── settings.json.example    # 不含真实密钥的共享设置模板
+│   └── .claude/
+│       └── agents/              # 同步到 ~/.claude/agents/ 的共享子代理
+└── local/
+    ├── .gitkeep                 # 占位文件
+    └── settings.json            # 本机私有 Claude 设置（gitignore）
 ```
 
 说明：

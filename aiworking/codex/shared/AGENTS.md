@@ -60,13 +60,25 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Project Docs Index
+## 5. Documentation Sync
 
-**Projects created from this standard environment should keep a root `docs/README.md` as the document index.**
+**After code changes, update docs in the same turn.**
 
-- Create `docs/README.md` in the project root when the project starts keeping docs under `docs/`.
-- Every time a new file is added under the project's `docs/`, update `docs/README.md` in the same change.
-- Keep `docs/README.md` minimal: list each document and its purpose.
+- If you add, rename, or remove a file referenced in `README.md` or `AGENTS.md`, update the reference.
+- Keep paired instruction files in sync: apply the same rule change to all paired copies (`CLAUDE.md` / `AGENTS.md` and their deployed copies) in the same turn.
+- Projects created from this standard environment should keep a root `docs/README.md` as the document index; update it in the same change whenever a new file is added under `docs/`.
+- Keep docs minimal — one line per entry, match existing format.
+- Skip doc updates for trivial or temporary changes.
+
+## 6. Change Summary Output
+
+**After each modification, output a structured summary in this order:**
+
+1. **Modification summary** — Brief overview of what was changed
+2. **Specific change points** — Show the actual modifications (diff or code snippets)
+3. **Documentation update summary** — If docs were updated, list which files and what changed
+
+This applies to all code changes, not just large refactors.
 
 ---
 

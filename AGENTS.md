@@ -1,93 +1,6 @@
 # AGENTS.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
-
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
-
-## 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-## 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
-## 5. Documentation Sync
-
-**After code changes, update docs in the same turn.**
-
-- If you add, rename, or remove a file referenced in `README.md` or `AGENTS.md`, update the reference.
-- If you add a new install script, update the "Adding a New Install Script" section or the structure overview.
-- Keep docs minimal — one line per entry, match existing format.
-- Skip doc updates for trivial or temporary changes.
-
-## 6. Change Summary Output
-
-**After each modification, output a structured summary in this order:**
-
-1. **Modification summary** — Brief overview of what was changed
-2. **Specific change points** — Show the actual modifications (diff or code snippets)
-3. **Documentation update summary** — If docs were updated, list which files and what changed
-
-This applies to all code changes, not just large refactors.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
-
----
-
-# AGENTS.md
-
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents when working with code in this repository. Codex reads it directly; Claude Code loads it through the root `CLAUDE.md`, which imports this file. Shared behavioral rules are not duplicated here — they come from the global instructions deployed by the standard environment (`~/.codex/AGENTS.md`, `~/.claude/CLAUDE.md`).
 
 ## What This Repo Is
 
@@ -194,6 +107,18 @@ Follow the pattern used by existing scripts:
 2. `source "${SCRIPT_DIR}/env.sh"` (for `install/common/` scripts) or `source "${SCRIPT_DIR}/../common/env.sh"` (for platform-specific installers)
 3. Use `export_env NAME value` to persist env vars to `config/shell/env.conf`
 4. Use `complete_env_path PATH /some/path` to add to PATH in `config/shell/path.conf`
+5. Update the `Installation` section above (and root `README.md` if user-facing) in the same change
+
+## Repository Skills (.claude/skills/)
+
+Repo-scoped Agent Skills live in `.claude/skills/<name>/SKILL.md` — the single source of truth, read natively by Claude Code.
+`.codex/skills` is a relative symlink to `../.claude/skills` so Codex reads the same skills; never edit it or replace it with a real directory.
+`.agents/` is intentionally unused: Claude Code does not scan it and Codex discovery of it is unreliable.
+
+## Shared Skills (aiworking/shared/)
+
+`aiworking/shared/skills/` holds tool-neutral shared Agent Skills (single source of truth).
+Both `install/common/setup_claude_cli.sh` and `install/common/setup_codex_cli.sh` deploy them (copy-if-missing) into `~/.claude/skills/` and `~/.codex/skills/`; refresh deployed copies manually after content changes.
 
 ## Claude Config (aiworking/claude/)
 
@@ -201,14 +126,15 @@ Follow the pattern used by existing scripts:
 
 Standard structure:
 - `aiworking/claude/README.md` — Claude workspace overview and standard layout
-- `aiworking/claude/CLAUDE.md` — shared Claude instructions copied into `~/.claude/CLAUDE.md`
-- `aiworking/claude/settings.json.example` — tracked settings template without machine-local secrets
+- `aiworking/claude/shared/CLAUDE.md` — shared Claude instructions copied to `~/.claude/CLAUDE.md`
+- `aiworking/claude/shared/settings.json.example` — tracked settings template without machine-local secrets
+- `aiworking/claude/shared/.claude/` — shared Claude agents copied into `~/.claude/`
 - `aiworking/claude/local/` — untracked machine-local Claude settings such as `settings.json`
-- `aiworking/claude/.claude/` — shared Claude agents and skills copied into `~/.claude/`
 
 As part of the standard environment used by `install/common/setup_claude_cli.sh`, generated projects should include a root `docs/README.md`.
 Use that project-level `docs/README.md` as the index for documents under the project's `docs/` directory, and update it whenever a new document is added there.
 `install/common/setup_claude_cli.sh` installs Claude Code and syncs the shared/local Claude files above into `~/.claude/`.
+`aiworking/claude/shared/CLAUDE.md` and `aiworking/codex/shared/AGENTS.md` are paired shared instruction templates: when rules change, update both in the same change and refresh their deployed copies (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`), since the installers only copy when the target is missing.
 
 ## Codex Config (aiworking/codex/)
 

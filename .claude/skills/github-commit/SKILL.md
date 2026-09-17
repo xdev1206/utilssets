@@ -158,18 +158,37 @@ Configure the remote to use the token for this push only (do not persist
 credentials to disk):
 
 ```bash
-REMOTE_URL=$(git -C "$REPO" remote get-url origin)
+REMOTE_NAME=origin
+REMOTE_URL=$(git -C "$REPO" remote get-url "$REMOTE_NAME")
+
+# Resolve the destination branch explicitly. Do not push bare HEAD: a local
+# branch such as `default` can otherwise create/update the wrong remote branch.
+UPSTREAM_REF=$(git -C "$REPO" rev-parse --abbrev-ref --symbolic-full-name \
+  '@{upstream}' 2>/dev/null || true)
+if [[ "$UPSTREAM_REF" == "$REMOTE_NAME"/* ]]; then
+  TARGET_BRANCH="${UPSTREAM_REF#${REMOTE_NAME}/}"
+else
+  REMOTE_HEAD=$(git -C "$REPO" symbolic-ref --short \
+    "refs/remotes/${REMOTE_NAME}/HEAD" 2>/dev/null || true)
+  TARGET_BRANCH="${REMOTE_HEAD#${REMOTE_NAME}/}"
+fi
+if [ -z "$TARGET_BRANCH" ]; then
+  echo "error: cannot determine push target branch for $REPO" >&2
+  exit 1
+fi
+
 # inject token into URL for this push only
 AUTH_URL=$(echo "$REMOTE_URL" | sed "s|https://|https://${GH_TOKEN}@|")
-git -C "$REPO" push "$AUTH_URL" HEAD
+git -C "$REPO" push "$AUTH_URL" "HEAD:${TARGET_BRANCH}"
 ```
 
 If `origin` already uses SSH (`git@github.com:...`), push normally:
 ```bash
-git -C "$REPO" push origin HEAD
+git -C "$REPO" push origin "HEAD:${TARGET_BRANCH}"
 ```
 
-After each successful push, print that repository's remote URL and commit hash.
+Before pushing, report the resolved target branch. After each successful push,
+print that repository's remote URL, target branch, and commit hash.
 
 ## Error handling
 

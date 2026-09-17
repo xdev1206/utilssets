@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Initialization"
+  short_description: "Initialize and sync a repo workspace"
+  default_prompt: "Use $repo-init to initialize and verify the repo workspace."

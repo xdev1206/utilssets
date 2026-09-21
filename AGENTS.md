@@ -144,3 +144,17 @@ If `aiworking/codex/local/` is missing `auth.json` or `config.toml`, `install/co
 For Codex 0.148+ custom providers, the generated `config.toml` includes `env_key = "CODEX_API_KEY"` so the provider sends an authorization header explicitly instead of relying on `auth.json` fallback behavior from older versions; users still need to export `CODEX_API_KEY` in their shell environment before launching Codex.
 `install/common/setup_codex_cli.sh` only copies files into `~/.codex/` when the target path does not already exist.
 Projects created from this standard environment should also include a root `docs/README.md`; every time a new file is added under that project's `docs/`, update `docs/README.md` to keep the document index current.
+
+## Knowledge Base Rules
+
+- Store reusable knowledge in `docs/` and keep one primary document for each topic.
+- Keep mandatory agent behavior in `AGENTS.md`; keep executable workflows in `.claude/skills/<name>/SKILL.md`.
+- Organize `docs/` by domain and use lowercase, hyphen-separated filenames.
+- Every new, renamed, or removed document under `docs/` must update `docs/README.md` in the same change.
+- Document commands with their working directory, prerequisites, expected success criteria, and failure handling.
+- Do not commit tokens, passwords, private configuration, or unverified solutions.
+- When code behavior changes, check and update the related documentation, Skill, and examples in the same change.
+- Keep the main `utilssets` repository and the independent `src/repo/.repo/manifests` repository clearly distinguished in documentation.
+- Keep general-purpose knowledge in `knowledge/`, separate from project documentation in `docs/` and project source code.
+- Every new, renamed, or removed document under `knowledge/docs/` must update `knowledge/docs/README.md` in the same change.
+- Follow the detailed organization and maintenance rules in [`docs/conventions/knowledge-base.md`](docs/conventions/knowledge-base.md).

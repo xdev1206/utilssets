@@ -1,3 +1,5 @@
+
+
 # Utilssets
 
 A collection of development utilities and scripts for multi-platform environments.
@@ -65,7 +67,7 @@ bash install/common/setup_pyenv.sh
 
 ### 2. Load Environment
 
-Add to your `~/.bashrc` or `~/.zshrc`:
+Add to your `~/.bashrc`, `~/.zshrc`, or `~/.bash_profile`:
 
 ```bash
 export UTILSSETS_ROOT="/path/to/utilssets"

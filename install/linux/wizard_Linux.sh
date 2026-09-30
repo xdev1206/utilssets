@@ -114,8 +114,13 @@ ubuntu_sources()
         return
     fi
 
+    local codename
+    if ! codename=$(lsb_release -cs) || [ -z "${codename}" ]; then
+        echo "failed to get Ubuntu codename, skip changing package sources"
+        return
+    fi
+
     $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
-    local codename=$(lsb_release -cs)
 
     $SUDO tee -a /etc/apt/sources.list >/dev/null <<EOF
 # deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ ${codename} main restricted universe multiverse
@@ -151,11 +156,13 @@ debian_sources()
         return
     fi
 
-    $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
-    local codename=$(lsb_release -cs)
-    if [ $? -ne 0 ]; then
-        echo "run cmd: lsb_release -cs failed, return"
+    local codename
+    if ! codename=$(lsb_release -cs) || [ -z "${codename}" ]; then
+        echo "failed to get Debian codename, skip changing package sources"
+        return
     fi
+
+    $SUDO mv /etc/apt/sources.list /etc/apt/sources.list_bk
 
     echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename} main contrib non-free non-free-firmware
 deb https://mirrors.tuna.tsinghua.edu.cn/debian/ ${codename}-updates main contrib non-free non-free-firmware

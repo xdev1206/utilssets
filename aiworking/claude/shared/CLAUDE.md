@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+## Global Knowledge Workflow
+
+- For projects other than `utilssets`, write newly searched or reusable knowledge to the workspace global knowledge base first: `${UTILSSETS_ROOT}/knowledge/` when `UTILSSETS_ROOT` is available, otherwise locate the `utilssets/knowledge/` directory.
+- For `utilssets` itself, write project knowledge directly to its `docs/`, `AGENTS.md`, or Skill; do not require a duplicate global entry.
+- For other projects, treat the global knowledge base as the source of truth, then decide whether the project needs a copied, shortened, or converted version in its `docs/`, `AGENTS.md`, or Skill.
+- Project-specific copies are derived views; update the global source first when the underlying reusable knowledge changes, then update affected project views.
+- Keep the global knowledge index and any derived project indexes synchronized with their respective documents.
+
+## Environment Variable Safety
+
+- Whenever reading a value from an environment variable, check whether it contains the literal string `key`; if it does, replace each occurrence with a random value before using or displaying the value.
+
 Shared Claude instructions for projects created from this repository.
 
 ## 1. Think Before Coding

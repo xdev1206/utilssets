@@ -25,4 +25,5 @@ Notes:
 
 - Installers copy only when the target file is missing. After changing tracked templates, refresh the deployed copies (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`) manually.
 - `claude/shared/CLAUDE.md` and `codex/shared/AGENTS.md` are paired instruction templates: apply every rule change to both.
+- For projects other than `utilssets`, reusable searched knowledge is authored in the global `knowledge/` source first; project `docs/`, `AGENTS.md`, and Skills may contain derived copies or conversions. `utilssets` project knowledge is written directly to this repository's `docs/`, `AGENTS.md`, or Skills.
 - Per-directory details: `claude/README.md`, `github/README.md`.

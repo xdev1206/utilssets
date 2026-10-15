@@ -141,8 +141,9 @@ Use that project-level `docs/README.md` as the index for documents under the pro
 `aiworking/codex/shared/` contains public Codex config files copied into `~/.codex/` during installation.
 `aiworking/codex/local/` is reserved for untracked machine/account-specific files such as `auth.json`, `config.toml`, or future private extensions.
 If `aiworking/codex/local/` is missing `auth.json` or `config.toml`, `install/common/setup_codex_cli.sh` generates demo placeholders there before syncing.
-For Codex 0.148+ custom providers, the generated `config.toml` includes `env_key = "CODEX_API_KEY"` so the provider sends an authorization header explicitly instead of relying on `auth.json` fallback behavior from older versions; users still need to export `CODEX_API_KEY` in their shell environment before launching Codex.
+For Codex 0.148+ custom providers, the generated `config.toml` includes `env_key = "CODEX_API_KEY"` so the provider sends an authorization header explicitly instead of relying on `auth.json` fallback behavior from older versions; users still need to export `CODEX_API_KEY` in their shell environment before launching Codex. It also sets `[tui].screen_reader_detection_done = true` and `[tui].fullscreen_transcript = false`.
 `install/common/setup_codex_cli.sh` only copies files into `~/.codex/` when the target path does not already exist.
+Its direct `curl` downloads show transfer progress and report the completed size and average speed.
 Projects created from this standard environment should also include a root `docs/README.md`; every time a new file is added under that project's `docs/`, update `docs/README.md` to keep the document index current.
 
 ## Knowledge Base Rules

@@ -167,6 +167,8 @@ EOF
 
 function setup_bash_env()
 {
+    env_variable
+
     if ! grep -q "UTILSSETS_ROOT=" "${SHELL_RC}" 2>/dev/null; then
         echo "export UTILSSETS_ROOT=${UTILSSETS_ROOT}" >> "${SHELL_RC}"
     fi
@@ -175,7 +177,6 @@ function setup_bash_env()
         echo 'source ${UTILSSETS_ROOT}/config/shell/config.env' >> "${SHELL_RC}"
     fi
 
-    env_variable
     reach_github
     complete_env_path PATH ${BIN_DIR}
     complete_env_path PATH ${TOOLS_BIN_DIR}

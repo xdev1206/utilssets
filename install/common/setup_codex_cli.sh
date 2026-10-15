@@ -13,6 +13,14 @@ fi
 
 echo "Detected shell profile: ${SHELL_RC}"
 
+print_download_summary() {
+    local downloaded_bytes="$1"
+    local speed_bytes_per_second="$2"
+
+    awk -v bytes="${downloaded_bytes}" -v speed="${speed_bytes_per_second}" \
+        'BEGIN { printf "Download complete: %.2f MiB; average speed: %.2f MiB/s\n", bytes / 1048576, speed / 1048576 }'
+}
+
 install_nvm() {
     if [ ! -d "$HOME/.nvm" ]; then
         echo "Fetching latest NVM release version..."
@@ -24,7 +32,21 @@ install_nvm() {
         fi
 
         echo "Installing NVM ${NVM_LATEST_TAG}..."
-        curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_LATEST_TAG}/install.sh" | bash
+        local tmp_script download_stats downloaded_bytes speed_bytes_per_second
+        tmp_script=$(mktemp)
+        if ! download_stats=$(curl -fL -o "${tmp_script}" \
+            -w '%{size_download} %{speed_download}' \
+            "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_LATEST_TAG}/install.sh"); then
+            rm -f "${tmp_script}"
+            return 1
+        fi
+        read -r downloaded_bytes speed_bytes_per_second <<< "${download_stats}"
+        print_download_summary "${downloaded_bytes}" "${speed_bytes_per_second}"
+        if ! bash "${tmp_script}"; then
+            rm -f "${tmp_script}"
+            return 1
+        fi
+        rm -f "${tmp_script}"
     else
         echo "NVM directory already exists at ~/.nvm"
     fi
@@ -84,12 +106,15 @@ install_cli() {
 
     case "${OS_TYPE}" in
         Darwin|Linux)
-            local tmp_script http_code
+            local tmp_script http_code download_stats downloaded_bytes speed_bytes_per_second
             tmp_script=$(mktemp)
             # shellcheck disable=SC2064
             trap "rm -f ${tmp_script}" RETURN
 
-            http_code=$(curl -sS -L -o "${tmp_script}" -w "%{http_code}" "${fallback_url}")
+            download_stats=$(curl -S -L -o "${tmp_script}" \
+                -w "%{http_code} %{size_download} %{speed_download}" "${fallback_url}")
+            read -r http_code downloaded_bytes speed_bytes_per_second <<< "${download_stats}"
+            print_download_summary "${downloaded_bytes}" "${speed_bytes_per_second}"
             if [ "${http_code}" = "200" ]; then
                 bash "${tmp_script}" || return 1
             else
@@ -181,10 +206,15 @@ base_url = "https://example.ai.com/v1"
 wire_api = "responses"
 # Export CODEX_API_KEY before running Codex with this custom provider.
 env_key = "CODEX_API_KEY"
+
+[tui]
+screen_reader_detection_done = true
+fullscreen_transcript = false
 EOF
         echo "Generated demo ${local_config_file}"
     fi
     chmod 600 "${local_auth_file}" "${local_config_file}"
+    export_env CODEX_API_KEY "ky_demo123456789"
 }
 
 copy_codex_tree_if_missing "${CODEX_SHARED_DIR}" "shared Codex config"

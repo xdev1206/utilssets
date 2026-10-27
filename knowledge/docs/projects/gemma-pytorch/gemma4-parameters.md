@@ -1,8 +1,8 @@
-# Gemma 4 E2B 参数参考
+# Gemma PyTorch: Gemma 4 E2B 参数
 
 ## 结论
 
-本文记录 Gemma PyTorch 仓库当前 `gemma/gemma4/` 实现的配置。E2B 是 35 层 dense Transformer，使用局部/全局混合注意力、每层额外的 256 维输入，以及配置驱动的视觉和音频塔。
+本文记录本地 Gemma PyTorch 仓库当前 `gemma/gemma4/` 实现的配置。E2B 是 35 层 dense Transformer，使用局部/全局混合注意力、每层额外的 256 维输入，以及配置驱动的视觉和音频塔。
 
 实现位置：`gemma/gemma4/gemma4_config.py`、`gemma/gemma4/gemma4_model.py`。
 

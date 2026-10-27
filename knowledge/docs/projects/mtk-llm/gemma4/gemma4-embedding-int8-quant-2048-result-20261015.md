@@ -12,7 +12,9 @@ Gemma-4-E2B-it 使用 embedding `int8` 后，完整 PTQ、fix-shape 和 x86 量�
 
 ```json
 {
-    "llm": {"0-34": "dynamic_quant"},
+    "llm": {
+        "0-34": "dynamic_quant"
+    },
     "tail": "dynamic_quant",
     "default": "int8",
     "softmax": "float",

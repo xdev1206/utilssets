@@ -188,6 +188,13 @@ alignment run always means the required checkpoint was actually loaded.
 
 ## Validation boundary
 
+Separate deterministic preprocessing checks from checkpoint-dependent
+numerical checks. Tokenizer, configuration, pan-and-scan, image normalization,
+and batch-shape checks can run without model weights; checkpoint comparisons
+must identify the model, prompt or image, device, dtype, generated length, and
+tolerance. Keep these cases and their comparison metadata in
+`tests/data/alignment_cases.json` rather than duplicating them in test code.
+
 The formal Gemma 4 reference contract is BF16 with Transformers attention
 explicitly forced to `eager`. Text logits, greedy text generation, vision
 features, audio features, audio-text logits, and image-text logits are checked
@@ -198,3 +205,7 @@ Reports include profile metadata, thresholds, and measured error metrics.
 Prompts, backend, and thresholds are read from the manifest rather than
 duplicated in test code. SDPA, other dtypes/devices, and Gemma 3 multimodal
 numerical parity are not covered by the current acceptance boundary.
+
+The recorded Gemma 3 CUDA smoke baseline uses seed `12345`, prompt
+`The capital of Italy is`, and two generated tokens; expected output is
+` Rome.`. Check the case manifest and report before using it as a current gate.

@@ -6,7 +6,7 @@ AudioEncoder 不直接向 Gemma4 Transformer 输入 waveform，而是先把音�
 
 当前使用的 HF `gemma-4-E2B-it` checkpoint 已确认包含 AudioEncoder、VisionEncoder 以及到 Gemma4 text embedding 空间的投影权重；但 MTK Gemma4 部署工程目前只完成文本 LLM、token embedding 和 PLE 部署。运行时虽然预留了 `getAudioEmbedding()` 接口，但现有 `LlavaRuntime` 明确将 Audio 标记为未实现。因此本方案的第一目标是先完成 PC/HF 参考链路，再逐步落到 MTK NPU 和设备端。
 
-## 当前状态（2026-10-14）
+## 当前状态（截至 2026-10-16）
 
 | 项目 | 状态 | 证据/说明 |
 | --- | --- | --- |
@@ -16,10 +16,11 @@ AudioEncoder 不直接向 Gemma4 Transformer 输入 waveform，而是先把音�
 | HF AudioEncoder 权重 | 已确认 | `model.audio_tower.*`，751 个 tensor |
 | HF VisionEncoder 权重 | 已确认 | `model.vision_tower.*`，658 个 tensor |
 | HF modality projector | 已确认 | `model.embed_audio.embedding_projection.weight`、`model.embed_vision.embedding_projection.weight` |
+| MTK AudioEncoder/projector float 图 | 已转换并通过 HF 边界对齐 | 单音频 TFLite 输出 `[252,1536]`，cosine `0.999709`；本次使用 `mtk_converter 9.8.0` |
 | MTK AudioEncoder 推理实现 | 未实现 | 当前工程没有 AudioEncoder DLA/runner |
-| MTK Audio-to-text projector | 未实现 | HF 有投影权重，MTK 图尚未拆分/转换 |
+| MTK Audio-to-text projector 设备接入 | 未实现 | float TFLite 已包含 projector，尚未作为设备资源加载 |
 | Gemma4 设备端音频入口 | 未实现 | 当前 cmdline 工具没有 Gemma4 audio runner |
-| 音频端到端验证 | 未开始 | 需先确定模型版本和音频格式 |
+| 音频端到端验证 | 未开始 | encoder/projector 边界已过；Text LLM 与设备 runtime 尚未接入 |
 
 ## HF checkpoint 核查结果
 
@@ -79,7 +80,7 @@ Gemma4 Text Transformer（prompt + decode）
 - [x] 确认使用的是官方 Gemma4 E2B instruction-tuned multimodal checkpoint。
 - [x] 确认 checkpoint 包含 AudioEncoder、VisionEncoder、两个 modality projector 和特殊 token。
 - [x] 确认音频预处理基础参数：16 kHz、128-bin 特征、40 ms/token、序列上限 750。
-- [ ] 进一步从 HF processor/model forward 实测音频 waveform 到 `audio_embeds[N,1536]` 的 shape 和投影顺序。
+- [x] 从 HF processor/model forward 实测音频到 `audio_embeds[N,1536]` 的 shape 和投影顺序。
 - [ ] 固化 MTK 接口：`audio waveform -> audio_embeds[N,1536]`。
 
 验收：同一音频在 HF 侧能够生成稳定的音频 embedding，并能通过官方 multimodal model 生成合理文本。
@@ -112,8 +113,8 @@ Gemma4 Text Transformer（prompt + decode）
 - [x] 保存 processor 输入、encoder/projector hook 摘要和 HF greedy 输出。
 - [x] Gemma4 相关脚本命名统一包含 `gemma4`，便于检索和识别。
 - [ ] 实现独立的音频预处理校验，并保存原始特征。
-- [ ] 确认当前 Transformers 版本下 hook 捕获的 projector 输出与模型内部最终 LLM 输入一致。
-- [ ] 验证 `<audio>` 占位 token 展开后的 token 数量、顺序和位置编码。
+- [x] 确认 HF projector 输出与模型内部最终 LLM 音频输入一致。
+- [x] 验证当前样本 `<audio>` 占位 token 展开后的数量和顺序（252 个 token）。
 - [ ] 使用至少 3 条音频样本覆盖语音识别、问答和非语音声音描述。
 - [ ] 建立 HF logits/生成结果基线。
 
@@ -123,8 +124,8 @@ Gemma4 Text Transformer（prompt + decode）
 
 - [ ] 将 AudioEncoder 和 projector 拆分成可转换的计算图；优先保持 projector 与 encoder 分离，便于定位误差。
 - [ ] 固定输入 shape 或定义动态 shape 集合。
-- [ ] 导出 TFLite/中间格式并执行 MTK converter。
-- [ ] 对比 HF、TFLite、MTK float 三个阶段的输出。
+- [x] 导出 TFLite 并执行 MTK converter。
+- [x] 对比 TFLite 输出与 HF Text Model 实际音频输入 embedding。
 - [ ] 评估 AudioEncoder 的权重、激活、输入 embedding 精度和内存占用。
 
 硬门禁：MTK float 输出必须先与 HF 参考对齐，确认通过后才允许 PTQ、fix-shape 或设备编译。
@@ -192,10 +193,9 @@ decode:        reuse KV cache; do not rerun AudioEncoder
 
 ## 当前阻塞与决策点
 
-1. **HF forward 路径待实测**：已确认组件和权重，但仍需用 `AutoProcessor`/`AutoModelForMultimodalLM` 导出中间 embedding，确认音频 token 数、projector 顺序和 mask。
-2. **MTK runtime 实现缺失**：现有 `LlavaRuntime` 的 Audio 接口是 fatal stub，不能直接运行音频。
-3. **设备资源格式未确定**：尚不能确定 AudioEncoder 是单独 DLA、与 projector 融合的 DLA，还是由 CPU/GPU 运行后把 embedding 喂给 NPU LLM。
-4. **音频 token 预算待确认**：processor 配置上限为 750，但当前 Gemma4 MTK prompt batch 为 256，需要设计分块或重新编译 shape。
+1. **MTK runtime 实现缺失**：现有 `LlavaRuntime` 的 Audio 接口是 fatal stub，不能直接运行音频。
+2. **设备资源格式未确定**：尚不能确定 AudioEncoder 是单独 DLA、与 projector 融合的 DLA，还是由 CPU/GPU 运行后把 embedding 喂给 NPU LLM。
+3. **音频 token 预算待确认**：processor 配置上限为 750，但当前 Gemma4 MTK prompt batch 为 256，需要设计分块或重新编译 shape。
 
 ## 更新规则
 
@@ -216,6 +216,54 @@ decode:        reuse KV cache; do not rerun AudioEncoder
 | 2026-10-14 | HF smoke test：text/audio/image 均完成生成；公开音频样本 projector 输出 `[1,252,1536]`，图像样本 projector 输出 `[256,1536]`；补充 ModelOutput 的 `last_hidden_state` 摘要捕获。 |
 | 2026-10-14 | 实施阶段 2 第一项：新增 `scripts/verify/gemma4_audio_encoder_export.py`，冻结 HF processor 输入、AudioEncoder 输出和 audio embedding 输出；暂不进行 MTK/TFLite 转换。 |
 | 2026-10-14 | 执行 HF 导出：processor `input_features` 为 `[1,1007,128]`，`input_features_mask` 为 `[1,1007]`；`audio_tower` 与 `embed_audio` 均为 `[1,252,1536]`，但 cosine similarity 仅约 0.0077，确认两者不是同一 tensor，后续应以 `embed_audio` 作为最终 embedding 边界候选。 |
+| 2026-10-15 | 读取 Transformers Gemma4 实现确认内部链路：AudioEncoder 为下采样卷积 + 12 层 hidden 1024 音频 Transformer + `output_proj(1024→1536)`；`embed_audio` 继续执行 RMSNorm + `embedding_projection(1536→1536)`，其输出才被 masked-scatter 到 Text LLM 输入。 |
+| 2026-10-15 | 独立两阶段 HF 对齐通过：`audio_tower → embed_audio` 与官方 `get_audio_features()` 的有效输出 `max_abs_error=0`、cosine≈1，确认可以按两个边界进入后续 MTK 导出。 |
+| 2026-10-15 | MTK wrapper 首次导出受环境阻塞：`torch.export` 可捕获图但当前 PyTorch 2.14.1 的 ExportedProgram 序列化失败；MTK converter V2 要求并验证 `2.1 <= torch < 2.9`，需切换专用兼容环境后再导出。 |
+| 2026-10-16 | 修复 trace 参数别名错误：trace 时 `per_dim_scale` 已替换为 `softplus(per_dim_scale)`，但 trace 后恢复原参数会改变 TorchScript 持有的参数，导致 attention softmax 偏移。保留折叠值后，第 0 层 softmax trace 与 HF eager 最大误差为 0。 |
+| 2026-10-16 | 完整音频 TFLite 经 `mtk_converter 9.8.0` 转换；TFLite/HF 实际 Text Model 音频输入边界 cosine=`0.999709`、global relative error=`0.018019`，verdict=`PASS`。产物：`logs/gemma4_audio_scale_fix/`。当前环境 PyTorch 2.14.1 超出该 converter 已声明支持范围，仍需在 PTQ 所用 converter 版本复核。 |
+
+## 已确认的 HF 音频计算边界
+
+```text
+input_features [B, T, 128]
+  → subsample_conv_projection
+      Conv2d(1→128) → LayerNorm → ReLU
+      Conv2d(128→32) → LayerNorm → ReLU
+      input_proj_linear(1024→1024)
+  → relative positional encoding
+  → 12 × Gemma4AudioLayer(hidden=1024)
+  → audio_tower.output_proj(1024→1536)
+  → embed_audio.embedding_pre_projection_norm(RMSNorm 1536)
+  → embed_audio.embedding_projection(1536→1536)
+  → 去除 padding audio soft tokens
+  → 替换 input_ids 中的 audio placeholder
+  → Gemma4 Text LLM
+```
+
+HF `Gemma4Model.get_audio_features()` 明确执行：
+
+1. `audio_tower(input_features, input_features_mask)`；
+2. `embed_audio(audio_outputs.last_hidden_state)`；
+3. 用 encoder 返回的有效位置 mask 去除 padding；
+4. 将最终 audio features 与 `<|audio|>` token slots 做数量检查后 masked-scatter 到文本 embedding。
+
+因此 MTK 拆图的首选边界是：
+
+- 图 A：`input_features + input_features_mask -> audio_tower.output_proj`；
+- 图 B：`audio_tower_output -> embed_audio -> final audio embeddings`；
+- 运行时根据有效 audio token 数，把图 B 输出插入 Text LLM prompt。
+
+暂不把 `input_features_mask` 简化为普通 attention mask；它同时决定 encoder 有效输出位置和最终 padding token 去除行为。
+
+独立对齐脚本：`scripts/verify/gemma4_audio_stage_alignment.py`。结果：`logs/gemma4_audio_stage_alignment/summary.json` 和 `stage_alignment.pt`。
+
+## MTK 导出环境门禁
+
+当前环境实际为 `torch 2.14.1+cu130`。虽然独立 PyTorch V2 导出曾受版本/序列化问题影响，
+但同一环境中的 `mtk_ptq_llm` 已成功转换 LLM；因此 AudioEncoder 不再以 PyTorch 版本
+范围作为门禁，直接复用该成功环境中的 `mtk_converter` 流程进行实测。
+
+本次尝试中：`torch.jit.trace` 因 Transformers blocked-mask/vmap 失败；`torch.export.export` 图捕获成功，但 `torch.export.save` 因当前版本的自定义 `TreeSpec` 序列化失败。当前没有生成可交给 `mtk_pytorch_v2_converter` 的 `.pt2` 文件。
 
 ## 相关代码
 
@@ -223,3 +271,50 @@ decode:        reuse KV cache; do not rerun AudioEncoder
 - `third_party/llm_cmdline_tool-v1.11.1/jni/prebuilt/src/llm_runtime/mllm_runtime.cpp`
 - `third_party/llm_cmdline_tool-v1.11.1/jni/prebuilt/src/llm_runtime/llava_mllm_runtime.h`
 - `configs/gemma4/gemma4_e2b_device.yaml`
+
+此前 TFLite→HF Text boundary cosine=`0.7518207`、max_abs_error=`29.1614`。根因已定位：
+`_install_converter_op_rewrites()` 在 trace 前把 `per_dim_scale` 原地改成 softplus 值，
+并把 `functional.softplus` 替换为恒等函数；trace 完成后恢复原始参数时，TorchScript
+仍引用同一参数对象，导致运行图使用未折叠 scale。attention logits 的 cosine 虽接近 1，
+scale 偏差经 softmax 放大后使概率 cosine 降到约 `0.594`。
+
+修复是让 trace 与 TFLite 转换期间保持 softplus 折叠后的参数。修复后的第 0 层 softmax
+trace/HF eager max_abs_error=`0`、TFLite/trace cosine=`1.0`。完整 TFLite 的 converter
+回读 cosine=`0.99999994`、max_abs_error=`0.0001302`；对比实际送入 HF Text Model 的
+252 个 audio token embedding，cosine=`0.999709`、mean_abs_error=`0.03793`、
+global_relative_error=`0.018019`，verdict=`PASS`。结果保存在
+`logs/gemma4_audio_scale_fix/`，旧 FAIL 产物保留为历史记录，不再代表当前状态。
+
+下一步是冻结 HF AudioEncoder 到 Text Model 的实际边界：新增
+`scripts/verify/gemma4_audio_text_boundary.py`，保存 AudioEncoder/projector 完成后
+传给 `model.language_model` 的 `inputs_embeds`、attention mask、position ids 和
+per-layer inputs。该边界用于后续 MTK Text Model 对接；在 MTK runtime 明确支持
+Gemma4 Audio 前，不进入设备端集成。
+HF Text Model 边界已冻结在 `logs/gemma4_audio_text_boundary/`。新的
+`scripts/verify/gemma4_audio_tflite_boundary_alignment.py` 检查 MTK TFLite 与其中真实
+audio token positions 的 embedding；与 converter 输入的 `input_features` 和 mask 逐元素
+相同后再比较，避免拿 trace reference 代替 HF 基线。float 边界门禁已通过；后续仍须在
+PTQ 所用 `mtk_converter 10.6.0` 环境复核，再开始 PTQ/fix-shape/MDLA 和 runtime 工作。
+
+## MTK converter 复用决策
+
+AudioEncoder 的正式转换必须复用成功 PTQ 所在环境中的 `mtk_converter`，并通过与
+`mtk_ptq_llm` 相同的 LLM SDK converter 流程处理；不采用当前环境的独立
+`torch.jit.trace`/`torch.export` 结果作为部署产物，也不把通用的
+`mtk_pytorch_v2_converter` 当作 `mtk_ptq_llm` 的等价替代入口。
+
+成功 PTQ 环境的 SDK 已发现部分 Gemma4 支持：`gemma4_quantized` 的 LLM/embedder、
+Gemma4 专用量化参数映射，以及 PTQ 中对 `audio_tower` 的处理逻辑均存在；但没有
+独立的 `gemma4_audio` encoder 类。因此下一步应定位该 SDK 的 Gemma4 全模型配置
+格式，优先复用现有全模型 PTQ 入口，不把 Gemma4 AudioEncoder 伪装成
+`qwen2_audio` 或 `whisper`。
+
+已确认：`mtk_ptq_llm` 和 `mtk_fix_llm_shape` 使用 `mtk_converter` 后端；后者处理
+PTQ 产物的 shape 固定，不负责重新导入 HF AudioEncoder。
+
+本项目已新增独立入口 `scripts/convert/gemma4_audio_mtk_converter.py`：加载 HF
+已验证的 `audio_tower + embed_audio`，封装为纯 Tensor 图后调用
+`mtk_converter.PyTorchConverter` 输出 TFLite/MLIR。该入口要求配套 MTK 环境的
+与已成功执行 `mtk_ptq_llm` 的环境保持一致；不再以 PyTorch 版本范围作为独立
+AudioEncoder 转换的阻塞条件，实际可用性以 `mtk_ptq_llm`/`mtk_converter` 的实测
+结果为准。

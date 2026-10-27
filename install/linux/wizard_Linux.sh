@@ -31,13 +31,9 @@ func_installing_status()
 
 func_bash_env()
 {
-    alias_found=`cat $SHELL_RC | grep -c "alias ll="`
-    if [ $alias_found -eq 0 ]; then
-        # alias
-        echo -e "\nalias ll='ls -l --color=auto'" >> $SHELL_RC
-        echo -e "alias la='ls -la --color=auto'" >> $SHELL_RC
-        echo -e "alias ls='ls --color=auto'" >> $SHELL_RC
-    fi
+    grep -qE '^[[:space:]]*alias ll=' "$SHELL_RC" || echo "alias ll='ls -l --color=auto'" >> "$SHELL_RC"
+    grep -qE '^[[:space:]]*alias la=' "$SHELL_RC" || echo "alias la='ls -la --color=auto'" >> "$SHELL_RC"
+    grep -qE '^[[:space:]]*alias ls=' "$SHELL_RC" || echo "alias ls='ls --color=auto'" >> "$SHELL_RC"
 
     export_env PS1 '"\[\e]0;\u@\h: \w\a\]\[\e[33m\]\u@\h\[\e[0m\]:\[\033[01;34m\]\w\[\e[0m\]\$ "'
     # force color prompt

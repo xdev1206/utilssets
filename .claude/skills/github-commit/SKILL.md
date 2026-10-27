@@ -154,8 +154,9 @@ force push or destructive cleanup in the other repository.
 
 ## Step 7 — Push each repository independently
 
-Configure the remote to use the token for this push only (do not persist
-credentials to disk):
+For HTTPS remotes, pass the token through a temporary askpass helper. Do not
+put credentials in the remote URL or command arguments, and do not persist
+credentials to Git config:
 
 ```bash
 REMOTE_NAME=origin
@@ -177,18 +178,42 @@ if [ -z "$TARGET_BRANCH" ]; then
   exit 1
 fi
 
-# inject token into URL for this push only
-AUTH_URL=$(echo "$REMOTE_URL" | sed "s|https://|https://${GH_TOKEN}@|")
-git -C "$REPO" push "$AUTH_URL" "HEAD:${TARGET_BRANCH}"
+if [[ "$REMOTE_URL" == https://* ]]; then
+  # Drop any existing URL userinfo before passing the remote to Git.
+  PUSH_URL=$(printf '%s\n' "$REMOTE_URL" | sed -E 's#^(https://)[^/@]+@#\1#')
+  ASKPASS_SCRIPT=$(mktemp /tmp/github-askpass.XXXXXX)
+  trap 'rm -f "$ASKPASS_SCRIPT"' EXIT
+  cat > "$ASKPASS_SCRIPT" <<'EOF'
+#!/bin/sh
+case "$1" in
+  *Username*) printf '%s\n' 'x-access-token' ;;
+  *Password*) printf '%s\n' "$GH_TOKEN" ;;
+  *) exit 1 ;;
+esac
+EOF
+  chmod 700 "$ASKPASS_SCRIPT"
+  if GIT_ASKPASS="$ASKPASS_SCRIPT" GIT_TERMINAL_PROMPT=0 \
+    git -C "$REPO" push "$PUSH_URL" "HEAD:${TARGET_BRANCH}"; then
+    PUSH_STATUS=0
+  else
+    PUSH_STATUS=$?
+  fi
+  rm -f "$ASKPASS_SCRIPT"
+  trap - EXIT
+  if [ "$PUSH_STATUS" -ne 0 ]; then
+    exit "$PUSH_STATUS"
+  fi
+else
+  git -C "$REPO" push "$REMOTE_NAME" "HEAD:${TARGET_BRANCH}"
+fi
 ```
 
-If `origin` already uses SSH (`git@github.com:...`), push normally:
-```bash
-git -C "$REPO" push origin "HEAD:${TARGET_BRANCH}"
-```
+The non-HTTPS branch above handles SSH remotes using the configured SSH
+authentication.
 
 Before pushing, report the resolved target branch. After each successful push,
-print that repository's remote URL, target branch, and commit hash.
+print the repository path, target branch, and commit hash. Never print a remote
+URL that may contain credentials.
 
 ## Error handling
 

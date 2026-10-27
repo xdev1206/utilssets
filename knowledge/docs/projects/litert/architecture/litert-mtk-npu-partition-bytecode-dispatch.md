@@ -138,3 +138,7 @@ unresolved custom op: DISPATCH_OP
 ## 验证范围
 
 本文描述的是 LiteRT MediaTek compiler plugin 的 AOT 编译和 dispatch 数据流。它解释 bytecode 如何生成、绑定和加载，不代表某个具体 SoC、Neuron SDK 或手机固件已经通过端到端运行验证。
+
+## Related Files
+
+- [LiteRT MediaTek NPU Partition 切分与 DISPATCH_OP 连接逻辑](litert-mtk-npu-partition-dispatch.md)：介绍算子分组、subgraph 切分和主图 Tensor 重连。

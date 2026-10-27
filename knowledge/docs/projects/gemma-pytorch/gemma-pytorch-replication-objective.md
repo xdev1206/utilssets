@@ -26,3 +26,15 @@ Validation should use fixed checkpoints, prompts, images, and tolerances so
 results can be compared against the reference implementation. Changes should
 document any intentional deviation caused by PyTorch APIs, hardware, or
 checkpoint format differences.
+
+## Upstream reference
+
+The upstream [`google-deepmind/gemma`](https://github.com/google-deepmind/gemma)
+repository is the behavioral and architectural reference; its layout and
+contribution rules do not describe the local `gemma_pytorch` checkout. The
+upstream snapshot previously reviewed used the `gemma/`, `scripts/`,
+`tokenizer/`, and `docker/` directories, pinned dependencies in
+`requirements.txt`, and `setup.py` for installation. Its README documented
+Docker execution on CPU, CUDA, TPU, and XLA-GPU. That snapshot reported no
+tracked test or lint configuration; verify the upstream tree before relying on
+that status. Contributions use GitHub pull requests and the Google CLA.

@@ -20,7 +20,9 @@
 
 ```json
 {
-    "llm": {"0-34": "dynamic_quant"},
+    "llm": {
+        "0-34": "dynamic_quant"
+    },
     "tail": "dynamic_quant",
     "default": "dynamic_quant",
     "softmax": "float",
@@ -67,4 +69,6 @@ python scripts/verify/screen_quant_outputs.py \
 
 ## 历史对照
 
-此前仅使用 `quant_dynamic.json` 的实验曾出现 6/6 `GARBAGE`；该结果保留在 [旧记录](gemma4-dynamic-quant-x86-result-2026-10-13.md) 中。本次使用 2048 条语言均衡校准集后，x86 输出恢复为语义正常并通过对比。
+此前仅使用 `quant_dynamic.json` 的实验曾出现 6/6 `GARBAGE`；根因分析和逐层证据见
+[动态量化误差分析（2026-10-13）](gemma4-dynamic-quant-layer-error-analysis-20261013.md)。
+本次使用 2048 条语言均衡校准集后，x86 输出恢复为语义正常并通过对比。

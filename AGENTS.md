@@ -105,7 +105,7 @@ Notable scripts:
 Follow the pattern used by existing scripts:
 1. `SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"`
 2. `source "${SCRIPT_DIR}/env.sh"` (for `install/common/` scripts) or `source "${SCRIPT_DIR}/../common/env.sh"` (for platform-specific installers)
-3. Use `export_env NAME value` to persist env vars to `config/shell/env.conf`
+3. Use `export_env NAME value` only for non-secret vars; it stores values in plaintext in `config/shell/env.conf`
 4. Use `complete_env_path PATH /some/path` to add to PATH in `config/shell/path.conf`
 5. Update the `Installation` section above (and root `README.md` if user-facing) in the same change
 
@@ -131,8 +131,6 @@ Standard structure:
 - `aiworking/claude/shared/.claude/` — shared Claude agents copied into `~/.claude/`
 - `aiworking/claude/local/` — untracked machine-local Claude settings such as `settings.json`
 
-As part of the standard environment used by `install/common/setup_claude_cli.sh`, generated projects should include a root `docs/README.md`.
-Use that project-level `docs/README.md` as the index for documents under the project's `docs/` directory, and update it whenever a new document is added there.
 `install/common/setup_claude_cli.sh` installs Claude Code and syncs the shared/local Claude files above into `~/.claude/`.
 `aiworking/claude/shared/CLAUDE.md` and `aiworking/codex/shared/AGENTS.md` are paired shared instruction templates: when rules change, update both in the same change and refresh their deployed copies (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`), since the installers only copy when the target is missing.
 
@@ -141,17 +139,16 @@ Use that project-level `docs/README.md` as the index for documents under the pro
 `aiworking/codex/shared/` contains public Codex config files copied into `~/.codex/` during installation.
 `aiworking/codex/local/` is reserved for untracked machine/account-specific files such as `auth.json`, `config.toml`, or future private extensions.
 If `aiworking/codex/local/` is missing `auth.json` or `config.toml`, `install/common/setup_codex_cli.sh` generates demo placeholders there before syncing.
-For Codex 0.148+ custom providers, the generated `config.toml` includes `env_key = "CODEX_API_KEY"` so the provider sends an authorization header explicitly instead of relying on `auth.json` fallback behavior from older versions; users still need to export `CODEX_API_KEY` in their shell environment before launching Codex. It also sets `[tui].screen_reader_detection_done = true` and `[tui].fullscreen_transcript = false`.
+For custom providers, the generated `config.toml` sets `env_key = "CODEX_API_KEY"` and the TUI options `[tui].screen_reader_detection_done = true` and `[tui].fullscreen_transcript = false`. The installer removes its former demo `CODEX_API_KEY` entry from `config/shell/env.conf`; users must provide a real value in their shell before launching Codex.
 `install/common/setup_codex_cli.sh` only copies files into `~/.codex/` when the target path does not already exist.
 Its direct `curl` downloads show transfer progress and report the completed size and average speed.
-Projects created from this standard environment should also include a root `docs/README.md`; every time a new file is added under that project's `docs/`, update `docs/README.md` to keep the document index current.
 
 ## Knowledge Base Rules
 
-- Store reusable knowledge in `docs/` and keep one primary document for each topic.
+- Store project knowledge in `docs/` and keep one primary document for each topic.
 - Keep mandatory agent behavior in `AGENTS.md`; keep executable workflows in `.claude/skills/<name>/SKILL.md`.
-- Organize `docs/` by domain and use lowercase, hyphen-separated filenames.
-- Every new, renamed, or removed document under `docs/` must update `docs/README.md` in the same change.
+- Organize `docs/` by domain and keep one primary document per topic. Follow the knowledge-base convention for directory depth, filenames, tags, and safe reorganization.
+- Keep a root `docs/README.md` as the index for project documents, including generated projects; update it whenever a document under `docs/` is added, renamed, or removed.
 - Document commands with their working directory, prerequisites, expected success criteria, and failure handling.
 - Do not commit tokens, passwords, private configuration, or unverified solutions.
 - When code behavior changes, check and update the related documentation, Skill, and examples in the same change.

@@ -83,7 +83,7 @@ function reach_github()
 }
 
 function escape_sed_replacement() {
-    printf '%s\n' "$1" | sed 's/[&/\]/\\&/g'
+    printf '%s\n' "$1" | sed 's/[&|\\]/\\&/g'
 }
 
 function export_env()
@@ -96,8 +96,7 @@ function export_env()
     local env_name="$1"
     local env_param="$2"
 
-    echo "env_name: ${env_name}"
-    echo "env_param: ${env_param}"
+    echo "Persisting environment variable: ${env_name}"
 
     # 校验环境变量名合法性
     if ! [[ "$env_name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
@@ -116,11 +115,9 @@ function export_env()
 
     if grep -qE "$pattern" "$SHELL_CONF"; then
         local env_param_escape=$(escape_sed_replacement "$env_param")
-        echo "env_param_escape: ${env_param_escape}"
-
         case "$(uname -s)" in
             Darwin)
-                sed -i '' "s|^export[[:space:]]\+${env_name_escape}=.*$|export ${env_name_escape}=${env_param_escape}|" "$SHELL_CONF"
+                sed -i '' "s|^export[[:space:]]\+${env_name}=.*$|export ${env_name}=${env_param_escape}|" "$SHELL_CONF"
                 ;;
             *)
                 sed -i "s|^export[[:space:]]\+${env_name}=.*$|export ${env_name}=${env_param_escape}|" "$SHELL_CONF"

@@ -49,9 +49,5 @@ tools/
 # Config
 config/shell/
 codex_resume
-aiworking/codex/local/**
-!aiworking/codex/local/.gitkeep
-aiworking/claude/local/**
-!aiworking/claude/local/.gitkeep
-aiworking/github/local/**
-!aiworking/github/local/.gitkeep
+aiworking/*/local/**
+!aiworking/*/local/.gitkeep

@@ -307,3 +307,7 @@ Neuron compiler 生成 Bytecode
 - 主图与 subgraph 的连接依靠 Tensor 输入输出边，不是简单的 op 列表拼接。
 - 一个 partition 可以包含多个 LiteRT 算子。
 - 本文描述的是 LiteRT/MTK AOT 数据流，不代表某个具体 SoC 和手机固件已完成端到端验证。
+
+## Related Files
+
+- [LiteRT MediaTek NPU 的 Partition、Bytecode 与 DISPATCH_OP](litert-mtk-npu-partition-bytecode-dispatch.md)：介绍 partition 编译、bytecode 绑定及设备端执行。

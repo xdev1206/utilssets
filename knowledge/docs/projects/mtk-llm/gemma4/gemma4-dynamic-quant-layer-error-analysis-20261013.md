@@ -6,11 +6,15 @@
 
 ## 证据
 
+- 配置：`quant_dynamic.json`；LLM/tail/residual/embedding 为 `dynamic_quant`，softmax/logits 为 FP，cache 为 INT8。
+- PTQ、fix-shape 和 x86 推理返回码均为 0，但 screen6 对比 6/6 `GARBAGE`，平均 ROUGE-L `0.2432`，token match ratio 全部为 0。
+- 典型输出包括多语言乱码、`<|channel>thought` 等异常 token、无意义重复和错误翻译/问答。
 - PTQ 日志：`logs/ptq_dynamic_20261013.log`；配置为 `dynamic_quant`，校准数据为 `fake`，并记录 `Skipping calibration as no static quantizers are present.`
 - fixed-shape 图：`work/gemma4_e2b_it/quantized_models_dynamic_fixed/llm/llm_1t4096c/quantized_models_dynamic_fixed_1t4096c_0.tflite`。
 - 该图包含 311 个 `FULLY_CONNECTED`、139 个 `QUANTIZE`、105 个 `DEQUANTIZE`；`input_embeds_0` 为 INT16，`hidden_states_0/1/34` 为 INT16，`hidden_states_35` 才是 FP32。
 - 35 个 decoder 层 hidden-state 输出尺度范围为 `0.000296589`（layer 11）到 `0.001661297`（layer 14），对应 INT16 可表示绝对范围约 `±9.72` 到 `±54.44`。
 - x86 结果：`verify_logs/dynamic_quant_x86_20261013/screen_summary.json`，6 条均为 `GARBAGE`，首 token mismatch index 均为 0。
+- 外部项目的逐条输出和补充日志：`/workspace/xin.xu5/projs/gemma_projs/gemma4/mtk-npu-llm-deploy/verify_logs/dynamic_quant_x86_20261013/README.md`。
 
 ## 根因判断
 

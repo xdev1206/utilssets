@@ -21,9 +21,13 @@ Both directories are standard-environment templates: tracked content here is dep
 - `*/local/` is for machine-private secrets only and must never be committed.
 - Repo-scoped content (e.g., skills that only make sense when working inside this repository) does not belong under `aiworking/`; see the root `AGENTS.md` for repository layout.
 
+## Permission Review Note
+
+- `claude/shared/settings.json.example` broadly allows `Bash`, `Exec`, `Write`, and `Edit`. The Claude installer copies this template when no local settings file exists. This permission risk is recorded here; the template defaults are unchanged.
+
 Notes:
 
-- Installers copy only when the target file is missing. After changing tracked templates, refresh the deployed copies (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`) manually.
+- Installers copy only when the target file is missing. After changing tracked templates, refresh the deployed copies (including `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, and deployed shared skills) manually.
 - `claude/shared/CLAUDE.md` and `codex/shared/AGENTS.md` are paired instruction templates: apply every rule change to both.
 - For projects other than `utilssets`, reusable searched knowledge is authored in the global `knowledge/` source first; project `docs/`, `AGENTS.md`, and Skills may contain derived copies or conversions. `utilssets` project knowledge is written directly to this repository's `docs/`, `AGENTS.md`, or Skills.
 - Per-directory details: `claude/README.md`, `github/README.md`.

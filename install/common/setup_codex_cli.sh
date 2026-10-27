@@ -214,7 +214,22 @@ EOF
         echo "Generated demo ${local_config_file}"
     fi
     chmod 600 "${local_auth_file}" "${local_config_file}"
-    export_env CODEX_API_KEY "ky_demo123456789"
+    remove_legacy_codex_demo_api_key
+}
+
+remove_legacy_codex_demo_api_key() {
+    if [ -z "${SHELL_CONF:-}" ] || [ ! -f "${SHELL_CONF}" ]; then
+        return 0
+    fi
+
+    case "$(uname -s)" in
+        Darwin)
+            sed -i '' '/^export CODEX_API_KEY=ky_demo123456789$/d' "${SHELL_CONF}"
+            ;;
+        *)
+            sed -i '/^export CODEX_API_KEY=ky_demo123456789$/d' "${SHELL_CONF}"
+            ;;
+    esac
 }
 
 copy_codex_tree_if_missing "${CODEX_SHARED_DIR}" "shared Codex config"

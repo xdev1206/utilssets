@@ -26,3 +26,7 @@
 - The residual sparse tower mismatch came from trimming padding before pooling. The reference keeps padded patches in the pooling matmul after zeroing their hidden states, then removes padding pool bins with a mask. The local vision model now retains padding through encoder/pooling and applies the same pool mask, preserving the reference reduction order.
 - Runtime validation now passes both the standalone vision-feature comparison and the image-text logits comparison after the RoPE and pooling fixes.
 - Runtime-created tensors and non-persistent buffers must be checked against the reference construction dtype; mathematically equivalent formulas can diverge under BF16 default-dtype construction.
+## Related LiteRT runtime contract
+
+Gemma4 external Embedding/PLE INT4 format and group-size constraints are
+maintained in the [MTK LLM G4LUTI4 runtime reference](../mtk-llm/runtime/gemma4-external-lut-g4luti4-int4.md).
